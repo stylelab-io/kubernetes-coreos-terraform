@@ -1,1 +1,1 @@
-variable "etcd_address" {}
+#variable "etcd_address" {}

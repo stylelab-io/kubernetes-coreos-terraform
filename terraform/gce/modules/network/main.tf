@@ -80,7 +80,7 @@ resource "google_compute_firewall" "allow-all-internal" {
 resource "google_compute_firewall" "allow-web" {
     name = "allow-web"
     network = "${var.gce_network_name}"
-    source_ranges = ["0.0.0.0/16"]
+    source_ranges = ["0.0.0.0/0"]
     target_tags = ["web"]
     allow {
         protocol = "tcp"

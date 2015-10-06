@@ -18,7 +18,7 @@ module "network" {
     gce_network_name = "${var.gce_network_name}"
     gce_network_range = "${var.gce_network_range}"
 }
-
+/*
 module "etcd" {
     source = "modules/etcd"
 
@@ -40,7 +40,7 @@ module "etcd" {
     gce_cluster_name = "${var.gce_cluster_name}"
     gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
     gce_account_file = "${var.gce_account_file}"
-}
+}*/
 
 
 
@@ -53,7 +53,7 @@ module "etcd" {
 module "kubernetes-master" {
     source = "modules/kubernetes-master"
 
-    etcd_address = "${module.etcd.pub_address}"
+  #  etcd_address = "${module.etcd.pub_address}"
 }
 /*
 module "kubernetes-node" {
