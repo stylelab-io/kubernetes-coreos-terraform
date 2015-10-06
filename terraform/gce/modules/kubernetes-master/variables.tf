@@ -1,0 +1,1 @@
+variable "etcd_address" {}
