@@ -27,7 +27,6 @@ variable "flannel_network" {
     default = "10.40.0.0/16"
 }
 
-
 # etcd
 # must be set for each deployment =(
 variable "etcd_discovery_url" {}
@@ -36,28 +35,13 @@ variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
 variable "etcd_count" {
-    default = 1
-}
-variable "etcd_image" {
-    default = "coreos-stable-766-3-0-v20150908"
+    default = 5
 }
 variable "etcd_data_disk_size" {
     default = 100
 }
 variable "etcd_image_disk_size" {
     default = 100
-}
-
-#skydns
-variable "skydns_count" {
-    default = 1
-}
-
-variable "skydns_machine_type" {
-    default = "n1-standard-1"
-}
-variable "skydns_image" {
-    default = "coreos-stable-766-3-0-v20150908"
 }
 
 # kubernetes
