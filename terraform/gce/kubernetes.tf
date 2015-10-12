@@ -28,6 +28,7 @@ module "etcd" {
 
     # etcd vars
     etcd_count = "${var.etcd_count}"
+    etcd_image = "${var.image}"
     etcd_data_disk_size = "${var.etcd_data_disk_size}"
     etcd_image_disk_size = "${var.etcd_image_disk_size}"
     etcd_machine_type = "${var.etcd_machine_type}"

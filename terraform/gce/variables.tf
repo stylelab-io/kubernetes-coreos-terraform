@@ -1,5 +1,7 @@
 # variable "" {}
 
+variable "image" {}
+
 # gce variables
 variable "gce_project" {}
 variable "gce_sshkey_metadata" {}
@@ -35,7 +37,7 @@ variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
 variable "etcd_count" {
-    default = 5
+    default = 1
 }
 variable "etcd_data_disk_size" {
     default = 100
