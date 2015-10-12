@@ -30,8 +30,8 @@ resource "google_compute_address" "etcd" {
 }*/
 
 # allow icmp and rdp
-resource "google_compute_firewall" "allow-rdp-icmp" {
-    name = "allow-rdp-icmp"
+resource "google_compute_firewall" "allow-rdp-icmp-ext" {
+    name = "-${var.gce_network_name}-allow-rdp-icmp-ext"
     network = "${var.gce_network_name}"
     source_ranges = ["0.0.0.0/0"]
     allow {
@@ -47,8 +47,8 @@ resource "google_compute_firewall" "allow-rdp-icmp" {
 }
 
 # allow ssh
-resource "google_compute_firewall" "allow-ssh" {
-    name = "allow-ssh"
+resource "google_compute_firewall" "allow-ssh-ext" {
+    name = "${var.gce_network_name}-allow-ssh-ext"
     network = "${var.gce_network_name}"
     source_ranges = ["0.0.0.0/0"]
     allow {
@@ -61,7 +61,7 @@ resource "google_compute_firewall" "allow-ssh" {
 }
 # allow all from internal network
 resource "google_compute_firewall" "allow-all-internal" {
-    name = "allow-all-internal"
+    name = "${var.gce_network_name}-allow-all-internal"
     network = "${var.gce_network_name}"
     source_ranges = ["${var.gce_network_range}"]
     allow {
@@ -77,8 +77,8 @@ resource "google_compute_firewall" "allow-all-internal" {
 #    ]
 }
 # http(s) 80,443,8080
-resource "google_compute_firewall" "allow-web" {
-    name = "allow-web"
+resource "google_compute_firewall" "allow-web-external" {
+    name = "${var.gce_network_name}-allow-web-external"
     network = "${var.gce_network_name}"
     source_ranges = ["0.0.0.0/0"]
     target_tags = ["web"]
