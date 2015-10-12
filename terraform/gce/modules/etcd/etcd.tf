@@ -2,6 +2,17 @@ output "pub_address" {
     value = "${format("http://%s:%s", google_compute_forwarding_rule.etcd.ip_address, "2379")}"
 }
 
+# one-liner to generate a new discovery token url
+# res=$(curl -w "\n" 'https://discovery.etcd.io/new?size=3');sed -i'' -e "s,discovery: \".*,discovery: \"$res\",g" coreos/etcd.yml;rm coreos/etcd.yml-e;
+resource "execute_command" "commands" {
+  #command = "res=$(curl -w '\n' 'https://discovery.etcd.io/new?size=3');sed -i'' -e 's,discovery: \\".*,discovery: \\"$res\\",g' $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e;"
+  command = "res=$(curl -w '\n' 'https://discovery.etcd.io/new?size=3');sed -i'' -e \"s,discovery: \\\".*,discovery: \\\"$res\\\",g\" $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e;"
+  destroy_command = ""
+}
+
+
+
+
 resource "google_compute_address" "etcd" {
     name = "etcd-address"
 }
