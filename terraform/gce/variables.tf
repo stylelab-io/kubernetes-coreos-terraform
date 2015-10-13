@@ -30,9 +30,6 @@ variable "flannel_network" {
 }
 
 # etcd
-# must be set for each deployment =(
-variable "etcd_discovery_url" {}
-
 variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
@@ -56,7 +53,6 @@ variable "km_disk_size" {
 variable "km_count" {
     default = 1
 }
-variable "km_image" {}
 
 variable "kw_machine_type" {
     default = "n1-standard-1"
