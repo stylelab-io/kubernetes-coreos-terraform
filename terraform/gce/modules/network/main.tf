@@ -24,10 +24,10 @@ resource "google_compute_address" "etcd" {
     name = "${var.gce_cluster_name}-etcd-ip"
 }
 
-/*resource "google_compute_network" "default" {
+resource "google_compute_network" "default" {
     name = "${var.gce_network_name}"
     ipv4_range = "${var.gce_network_range}"
-}*/
+}
 
 # allow icmp and rdp
 resource "google_compute_firewall" "allow-rdp-icmp-ext" {

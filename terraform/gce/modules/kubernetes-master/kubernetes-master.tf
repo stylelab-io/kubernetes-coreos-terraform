@@ -1,35 +1,34 @@
 resource "google_compute_http_health_check" "kubernetes-master" {
-    name = "kubernetes-master"
+    name = "${var.gce_cluster_name}-kube-master"
     request_path = "/v2/stats/self"
     check_interval_sec = 5
     timeout_sec = 1
     port = 2379
 }
 
-resource "google_compute_firewall" "etcd-ext" {
-    name = "etcd-ext"
-    network = "default"
+resource "google_compute_firewall" "kube-internal" {
+    name = "${var.gce_cluster_name}-allow-kube-master-internal"
+    network = "${var.network_name}"
 
     allow {
         protocol = "tcp"
-        ports = ["2379", "2380"]
+        ports = ["8080", "443"]
     }
-    source_ranges = ["0.0.0.0/0"]
-    target_tags = ["etcd"]
+    source_ranges = ["${var.gce_network_range},${var.flannel_network}"]
+    target_tags = ["kube-master"]
 }
 
-resource "google_compute_firewall" "etcd-int" {
-    name = "etcd-int"
-    network = "default"
+resource "google_compute_firewall" "kube-external" {
+    name = "${var.gce_cluster_name}-allow-kube-master-external"
+    network = "${var.network_name}"
 
     allow {
         protocol = "tcp"
-        ports = ["2379", "2380"]
+        ports = ["8080", "443"]
     }
-    source_ranges = ["0.0.0.0/0"]
-    target_tags = ["etcd"]
+    source_ranges = ["${var.gce_network_range},${var.flannel_network}"]
+    target_tags = ["kube-master"]
 }
-
 
 resource "template_file" "cloud_config" {
     filename = "../../coreos/master.yml"
@@ -39,19 +38,19 @@ resource "template_file" "cloud_config" {
 }
 
 resource "google_compute_target_pool" "kubernetes-master" {
-    name = "kubernetes-master"
+    name = "${var.gce_cluster_name}-kube-master"
     health_checks = [ "${google_compute_http_health_check.kubernetes-master.name}" ]
 }
 
 resource "google_compute_instance_template" "kubernetes-master" {
-    name = "kubernetes-master-template"
-    description = "template description"
-    instance_description = "description assigned to instances"
+    name = "${var.gce_cluster_name}-kube-master-template"
+    description = "Kubernetes Master instance template"
+    instance_description = "Kubernetes Master instace"
     machine_type = "n1-standard-1"
-    can_ip_forward = false
+    can_ip_forward = true
     automatic_restart = true
     on_host_maintenance = "MIGRATE"
-    tags = ["kubernetes-master", "web", "etcd"]
+    tags = ["kube-master"]
 
     # Create a new boot disk from an image
     disk {
@@ -61,9 +60,9 @@ resource "google_compute_instance_template" "kubernetes-master" {
     }
 
     network_interface {
-        network = "default"
+        network = "${var.network_name}"
         access_config {
-
+            //Ephemeral
         }
     }
 
