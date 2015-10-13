@@ -4,7 +4,7 @@ output "pub_address" {
 
 # one-liner to generate a new discovery token url
 # res=$(curl -w "\n" 'https://discovery.etcd.io/new?size=3');sed -i'' -e "s,discovery: \".*,discovery: \"$res\",g" coreos/etcd.yml;rm coreos/etcd.yml-e;
-resource "execute_command" "commands" {
+resource "execute_command" "set_discovery_url" {
   #command = "res=$(curl -w '\n' 'https://discovery.etcd.io/new?size=3');sed -i'' -e 's,discovery: \\".*,discovery: \\"$res\\",g' $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e;"
   command = "res=$(curl -w '\n' 'https://discovery.etcd.io/new?size=${var.etcd_count}');sed -i'' -e \"s,discovery: \\\".*,discovery: \\\"$res\\\",g\" $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e;"
   destroy_command = ""
@@ -80,6 +80,10 @@ resource "google_compute_instance_template" "etcd" {
     service_account {
         scopes = ["userinfo-email", "compute-ro", "storage-ro"]
     }
+
+    depends_on = [
+        "execute_command.set_discovery_url"
+    ]
 }
 
 resource "google_compute_instance_group_manager" "etcd" {
@@ -88,7 +92,7 @@ resource "google_compute_instance_group_manager" "etcd" {
     instance_template = "${google_compute_instance_template.etcd.self_link}"
     target_pools = ["${google_compute_target_pool.etcd.self_link}"]
     base_instance_name = "${var.gce_cluster_name}-etcd"
-    zone = "europe-west1-b"
+    zone = "${var.gce_zone}"
     target_size = "${var.etcd_count}"
 
     depends_on = [
