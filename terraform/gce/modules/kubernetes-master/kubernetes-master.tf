@@ -83,8 +83,8 @@ resource "google_compute_instance_group_manager" "kubernetes-master" {
     name = "kubernetes-master"
     instance_template = "${google_compute_instance_template.kubernetes-master.self_link}"
     target_pools = ["${google_compute_target_pool.kubernetes-master.self_link}"]
-    base_instance_name = "kubernetes-master"
-    zone = "europe-west1-b"
+    base_instance_name = "kube-master"
+    zone = "${var.gce_zone}"
     target_size = 2
     depends_on = [
         "google_compute_instance_template.kubernetes-master",

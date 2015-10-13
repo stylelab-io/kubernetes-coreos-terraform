@@ -24,7 +24,7 @@ module "etcd" {
 
     # provided by modules
     ip ="${module.network.etcd_ip}"
-    network_name = "${var.gce_network_name}"
+    network_name = "${module.network.network_name}"
 
     # etcd vars
     etcd_count = "${var.etcd_count}"
@@ -52,7 +52,7 @@ module "kubernetes-master" {
 
     etcd_address = "${module.etcd.pub_address}"
     ip ="${module.network.km_ip}"
-    network_name = "${var.gce_network_name}"
+    network_name = "${module.network.network_name}"
 
     kube_image = "${var.image}"
 

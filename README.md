@@ -14,9 +14,9 @@ to deploy containers on it.
 
 | Module     | Instance Templates   | Groupmanager | Pool   | Forwarding   | Healtcheck    | Firewall   | Network   |
 | -----------|:--------------------:| ------------:| ------:| ------------:| -------------:| ----------:| ---------:|
-| network    | -                    |              |        |              |               |            |           |
-| etcd2      | o                    |o             |o       |o             |o              |o           |x          |
-| master     | o                    |x             |x       |x             |x              |x           |x          |
+| network    | -                    |-             |-       |-             |-              |x           |o          |
+| etcd2      | o                    |o             |o       |o             |o              |o           |o          |
+| master     | o                    |o             |x       |x             |x              |x           |o          |
 | node       | x                    |x             |x       |x             |x              |x           |x          |
 
 

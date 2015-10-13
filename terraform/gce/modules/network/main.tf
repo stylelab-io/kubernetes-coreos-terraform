@@ -1,6 +1,6 @@
-/*output "network_name" {
+output "network_name" {
     value = "${google_compute_network.default.name}"
-}*/
+}
 
 output "km_ip" {
     value = "${google_compute_address.kmapi.0.address}"
@@ -41,9 +41,9 @@ resource "google_compute_firewall" "allow-rdp-icmp-ext" {
         protocol = "tcp"
         ports = ["3389"]
     }
-#    depends_on = [
-#        "google_compute_network.default",
-#    ]
+    depends_on = [
+        "google_compute_network.default",
+    ]
 }
 
 # allow ssh
@@ -55,10 +55,11 @@ resource "google_compute_firewall" "allow-ssh-ext" {
         protocol = "tcp"
         ports = ["22"]
     }
-#    depends_on = [
-#        "google_compute_network.default",
-#    ]
+    depends_on = [
+        "google_compute_network.default",
+    ]
 }
+
 # allow all from internal network
 resource "google_compute_firewall" "allow-all-internal" {
     name = "${var.gce_network_name}-allow-all-internal"
@@ -72,9 +73,9 @@ resource "google_compute_firewall" "allow-all-internal" {
         protocol = "tcp"
         ports = ["1-65535"]
     }
-#    depends_on = [
-#        "google_compute_network.default",
-#    ]
+    depends_on = [
+        "google_compute_network.default",
+    ]
 }
 # http(s) 80,443,8080
 resource "google_compute_firewall" "allow-web-external" {
@@ -86,7 +87,7 @@ resource "google_compute_firewall" "allow-web-external" {
         protocol = "tcp"
         ports = ["80", "443", "8080"]
     }
-    #depends_on = [
-  #      "google_compute_network.default",
-#    ]
+    depends_on = [
+        "google_compute_network.default",
+    ]
 }
