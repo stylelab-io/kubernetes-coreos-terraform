@@ -14,7 +14,7 @@ resource "google_compute_firewall" "kube-internal" {
         protocol = "tcp"
         ports = ["8080", "443"]
     }
-    source_ranges = ["${var.gce_network_range},${var.flannel_network}"]
+    source_ranges = ["${var.gce_network_range}","${var.flannel_network}"]
     target_tags = ["kube-master"]
 }
 
@@ -26,7 +26,7 @@ resource "google_compute_firewall" "kube-external" {
         protocol = "tcp"
         ports = ["8080", "443"]
     }
-    source_ranges = ["${var.gce_network_range},${var.flannel_network}"]
+    source_ranges = ["${var.gce_network_range}","${var.flannel_network}"]
     target_tags = ["kube-master"]
 }
 
