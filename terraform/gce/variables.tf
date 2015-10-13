@@ -17,7 +17,7 @@ variable "gce_cluster_name" {
     default = "test-cluster"
 }
 variable "gce_network_name" {
-    default = "test"
+    default = "default"
 }
 
 variable "gce_network_range" {
@@ -34,7 +34,7 @@ variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
 variable "etcd_count" {
-    default = 2
+    default = 1
 }
 variable "etcd_data_disk_size" {
     default = 100

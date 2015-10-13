@@ -55,6 +55,7 @@ module "kubernetes-master" {
     network_name = "${module.network.network_name}"
 
     kube_image = "${var.image}"
+    km_count = "${var.km_count}"
 
     #gce vars
     gce_project = "${var.gce_project}"

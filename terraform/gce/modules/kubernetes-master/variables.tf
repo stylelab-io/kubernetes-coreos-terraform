@@ -5,6 +5,8 @@ variable "ip" {}
 variable "network_name" {}
 variable "kube_image" {}
 
+variable "km_count" {}
+
   #gce vars
 variable "gce_project" {}
 variable "gce_region" {}
