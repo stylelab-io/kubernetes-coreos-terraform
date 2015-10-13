@@ -1,5 +1,5 @@
 output "network_name" {
-    value = "${google_compute_network.default.name}"
+    value = "${format("%s",google_compute_network.default.name)}"
 }
 
 output "km_ip" {
@@ -31,8 +31,8 @@ resource "google_compute_network" "default" {
 
 # allow icmp and rdp
 resource "google_compute_firewall" "allow-rdp-icmp-ext" {
-    name = "-${var.gce_network_name}-allow-rdp-icmp-ext"
-    network = "${var.gce_network_name}"
+    name = "${google_compute_network.default.name}-allow-rdp-icmp-ext"
+    network = "${google_compute_network.default.name}"
     source_ranges = ["0.0.0.0/0"]
     allow {
         protocol = "icmp"
@@ -48,8 +48,8 @@ resource "google_compute_firewall" "allow-rdp-icmp-ext" {
 
 # allow ssh
 resource "google_compute_firewall" "allow-ssh-ext" {
-    name = "${var.gce_network_name}-allow-ssh-ext"
-    network = "${var.gce_network_name}"
+    name = "${google_compute_network.default.name}-allow-ssh-ext"
+    network = "${google_compute_network.default.name}"
     source_ranges = ["0.0.0.0/0"]
     allow {
         protocol = "tcp"
@@ -62,8 +62,8 @@ resource "google_compute_firewall" "allow-ssh-ext" {
 
 # allow all from internal network
 resource "google_compute_firewall" "allow-all-internal" {
-    name = "${var.gce_network_name}-allow-all-internal"
-    network = "${var.gce_network_name}"
+    name = "${google_compute_network.default.name}-allow-all-internal"
+    network = "${google_compute_network.default.name}"
     source_ranges = ["${var.gce_network_range}"]
     allow {
         protocol = "udp"
@@ -79,8 +79,8 @@ resource "google_compute_firewall" "allow-all-internal" {
 }
 # http(s) 80,443,8080
 resource "google_compute_firewall" "allow-web-external" {
-    name = "${var.gce_network_name}-allow-web-external"
-    network = "${var.gce_network_name}"
+    name = "${google_compute_network.default.name}-allow-web-external"
+    network = "${google_compute_network.default.name}"
     source_ranges = ["0.0.0.0/0"]
     target_tags = ["web"]
     allow {
