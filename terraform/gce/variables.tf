@@ -34,7 +34,7 @@ variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
 variable "etcd_count" {
-    default = 1
+    default = 2
 }
 variable "etcd_data_disk_size" {
     default = 100
