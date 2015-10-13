@@ -1,6 +1,7 @@
 # variable "" {}
 #etcd
 variable "etcd_count" {}
+variable "etcd_image" {}
 variable "etcd_machine_type" {}
 variable "etcd_data_disk_size" {}
 variable "etcd_image_disk_size" {}
