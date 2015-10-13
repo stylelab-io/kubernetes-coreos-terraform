@@ -2,12 +2,12 @@
     value = "${google_compute_network.default.name}"
 }*/
 
-output "km_api_ips" {
-    value = "${formatlist("%s",google_compute_address.kmapi.*.address)}"
+output "km_ip" {
+    value = "${google_compute_address.kmapi.0.address}"
 }
 
-output "etcd_ips" {
-    value = "${formatlist("%s",google_compute_address.etcd.*.address)}"
+output "etcd_ip" {
+    value = "${google_compute_address.etcd.0.address}"
 }
 
 provider "google" {
