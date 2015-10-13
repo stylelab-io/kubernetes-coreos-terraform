@@ -14,10 +14,10 @@ variable "gce_region" {
     default = "europe-west1"
 }
 variable "gce_cluster_name" {
-    default = "ha-kube"
+    default = "test-cluster"
 }
 variable "gce_network_name" {
-    default = "default"
+    default = "test"
 }
 
 variable "gce_network_range" {
