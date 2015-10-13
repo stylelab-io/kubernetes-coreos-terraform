@@ -61,13 +61,13 @@ resource "google_compute_instance_template" "etcd" {
     tags = ["etcd"]
 
     disk {
-        source_image = "coreos-alpha-815-0-0-v20150924"
+        source_image = "${var.etcd_image}"
         auto_delete = true
         boot = true
     }
 
     network_interface {
-        network = "default"
+        network = "${var.network_name}"
         access_config {
             // Ephemeral IP
         }
