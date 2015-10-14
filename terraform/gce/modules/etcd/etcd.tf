@@ -12,11 +12,11 @@ resource "execute_command" "set_discovery_url" {
 
 
 resource "google_compute_address" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-address"
+    name = "${var.cluster_prefix}etcd-address"
 }
 
 resource "google_compute_http_health_check" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-check"
+    name = "${var.cluster_prefix}etcd-check"
     request_path = "/v2/stats/self"
     check_interval_sec = 5
     timeout_sec = 2
@@ -24,7 +24,7 @@ resource "google_compute_http_health_check" "etcd" {
 }
 
 resource "google_compute_firewall" "allow-etcd-external" {
-    name = "${var.gce_cluster_name}-allow-etcd-external"
+    name = "${var.cluster_prefix}allow-etcd-external"
     network = "${var.network_name}"
 
     allow {
@@ -36,7 +36,7 @@ resource "google_compute_firewall" "allow-etcd-external" {
 }
 
 resource "google_compute_firewall" "allow-etcd-internal" {
-    name = "${var.gce_cluster_name}-allow-etcd-internal"
+    name = "${var.cluster_prefix}allow-etcd-internal"
     network = "${var.network_name}"
 
     allow {
@@ -48,12 +48,12 @@ resource "google_compute_firewall" "allow-etcd-internal" {
 }
 
 resource "google_compute_target_pool" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-pool"
+    name = "${var.cluster_prefix}etcd-pool"
     health_checks = [ "${google_compute_http_health_check.etcd.name}" ]
 }
 
 resource "google_compute_forwarding_rule" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-forwarding"
+    name = "${var.cluster_prefix}etcd-forwarding"
     target = "${google_compute_target_pool.etcd.self_link}"
     port_range = "2379-2380"
 
@@ -63,7 +63,7 @@ resource "google_compute_forwarding_rule" "etcd" {
 }
 
 resource "google_compute_instance_template" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-template"
+    name = "${var.cluster_prefix}etcd-template"
     description = "A template for etcd2 instances"
     instance_description = "A etcd2 node"
     machine_type = "n1-standard-1"
@@ -79,7 +79,7 @@ resource "google_compute_instance_template" "etcd" {
     }
 
     network_interface {
-        network = "${var.network_name}"
+        network = "${var.network_name.self_link}"
         access_config {
             // Ephemeral IP
         }
@@ -99,11 +99,11 @@ resource "google_compute_instance_template" "etcd" {
 }
 
 resource "google_compute_instance_group_manager" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-group-manager"
+    name = "${var.cluster_prefix}etcd-group-manager"
     description = "Terraform test instance group manager"
     instance_template = "${google_compute_instance_template.etcd.self_link}"
     target_pools = ["${google_compute_target_pool.etcd.self_link}"]
-    base_instance_name = "${var.gce_cluster_name}-etcd"
+    base_instance_name = "${var.cluster_prefix}etcd"
     zone = "${var.gce_zone}"
     target_size = "${var.etcd_count}"
 

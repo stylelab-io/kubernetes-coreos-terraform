@@ -12,7 +12,7 @@ module "network" {
     gce_project = "${var.gce_project}"
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
-    gce_cluster_name = "${var.gce_cluster_name}"
+    cluster_prefix = "${var.cluster_prefix}"
     gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_name = "${var.gce_network_name}"
@@ -24,7 +24,7 @@ module "cert" {
 
     etcd_cert_path = "${var.etcd_cert_path}"
     etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
-    gce_cluster_name = "${var.gce_cluster_name}"
+    cluster_prefix = "${var.cluster_prefix}"
 }
 
 module "etcd" {
@@ -45,7 +45,7 @@ module "etcd" {
     gce_project = "${var.gce_project}"
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
-    gce_cluster_name = "${var.gce_cluster_name}"
+    cluster_prefix = "${var.cluster_prefix}"
     gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_range = "${var.gce_network_range}"
@@ -54,7 +54,7 @@ module "etcd" {
     flannel_network = "${var.flannel_network}"
 }
 
-
+/*
 module "kubernetes-master" {
     source = "modules/kubernetes-master"
 
@@ -69,7 +69,7 @@ module "kubernetes-master" {
     gce_project = "${var.gce_project}"
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
-    gce_cluster_name = "${var.gce_cluster_name}"
+    cluster_prefix = "${var.cluster_prefix}"
     gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_range = "${var.gce_network_range}"
@@ -77,7 +77,7 @@ module "kubernetes-master" {
     # flannel
     flannel_network = "${var.flannel_network}"
 
-}
+}*/
 /*
 module "kubernetes-node" {
     source = "modules/kubernetes-node"
