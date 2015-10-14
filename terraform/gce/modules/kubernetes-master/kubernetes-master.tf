@@ -80,7 +80,7 @@ resource "google_compute_instance_template" "kubernetes-master" {
 
 resource "google_compute_instance_group_manager" "kubernetes-master" {
     description = "Terraform test instance group manager"
-    name = "kubernetes-master"
+    name = "${var.gce_cluster_name}-kubernetes-master"
     instance_template = "${google_compute_instance_template.kubernetes-master.self_link}"
     target_pools = ["${google_compute_target_pool.kubernetes-master.self_link}"]
     base_instance_name = "kube-master"
