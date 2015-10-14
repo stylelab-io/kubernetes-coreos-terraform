@@ -1,1 +1,2 @@
-variable "etcd_ca_path" {}
+variable "etcd_cert_path" {}
+variable "etcd_cert_passphrase" {}

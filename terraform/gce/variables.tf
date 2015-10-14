@@ -19,7 +19,7 @@ variable "gce_cluster_name" {
 
 # network
 variable "gce_network_name" {
-    default = "default"
+    default = "test"
 }
 
 variable "gce_network_range" {
@@ -27,7 +27,9 @@ variable "gce_network_range" {
 }
 
 # certs
-variable "etcd_ca_path" {
+variable "etcd_cert_passphrase" {}
+
+variable "etcd_cert_path" {
     default = "../../etcd-ca-files"
 }
 

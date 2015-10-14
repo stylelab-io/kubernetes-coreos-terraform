@@ -22,7 +22,8 @@ module "network" {
 module "cert" {
     source = "./modules/cert"
 
-    etcd_ca_path = "${var.etcd_ca_path}"
+    etcd_cert_path = "${var.etcd_cert_path}"
+    etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
 }
 
 module "etcd" {
