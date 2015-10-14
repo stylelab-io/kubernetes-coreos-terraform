@@ -16,12 +16,19 @@ variable "gce_region" {
 variable "gce_cluster_name" {
     default = "test-cluster"
 }
+
+# network
 variable "gce_network_name" {
     default = "default"
 }
 
 variable "gce_network_range" {
     default ="10.10.0.0/16"
+}
+
+# certs
+variable "etcd_ca_path" {
+    default = "../../etcd-ca-files"
 }
 
 # flannel
@@ -34,7 +41,7 @@ variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
 variable "etcd_count" {
-    default = 1
+    default = 2
 }
 variable "etcd_data_disk_size" {
     default = 100

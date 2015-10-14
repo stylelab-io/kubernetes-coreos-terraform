@@ -23,8 +23,20 @@ resource "google_compute_http_health_check" "etcd" {
     port = 2379
 }
 
-resource "google_compute_firewall" "allow-etcd-int" {
-    name = "${var.gce_cluster_name}-allow-etcd-int"
+resource "google_compute_firewall" "allow-etcd-external" {
+    name = "${var.gce_cluster_name}-allow-etcd-external"
+    network = "${var.network_name}"
+
+    allow {
+        protocol = "tcp"
+        ports = ["2379"]
+    }
+    source_ranges = ["0.0.0.0/0"]
+    target_tags = ["etcd"]
+}
+
+resource "google_compute_firewall" "allow-etcd-internal" {
+    name = "${var.gce_cluster_name}-allow-etcd-internal"
     network = "${var.network_name}"
 
     allow {

@@ -1,7 +1,7 @@
 provider "google" {
-    account_file = "${file("/Users/stevenwirges/google/stylelounge-1042.json")}"
-    project = "stylelounge-1042"
-    region = "europe-west1"
+    account_file = "${file("${var.gce_account_file}")}"
+    project = "${var.gce_project}"
+    region = "${var.gce_region}"
 }
 
 module "network" {
@@ -17,6 +17,12 @@ module "network" {
     gce_account_file = "${var.gce_account_file}"
     gce_network_name = "${var.gce_network_name}"
     gce_network_range = "${var.gce_network_range}"
+}
+
+module "cert" {
+    source = "./modules/cert"
+
+    etcd_ca_path = "${var.etcd_ca_path}"
 }
 
 module "etcd" {
