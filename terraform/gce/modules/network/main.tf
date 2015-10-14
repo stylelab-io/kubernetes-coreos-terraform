@@ -1,3 +1,4 @@
+# self_link? see: hashicorp/terraform#3226
 output "network_name" {
     value = "${google_compute_network.default.self_link}"
 }
