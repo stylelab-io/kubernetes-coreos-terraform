@@ -24,6 +24,7 @@ module "cert" {
 
     etcd_cert_path = "${var.etcd_cert_path}"
     etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
+    gce_cluster_name = "${var.gce_cluster_name}"
 }
 
 module "etcd" {
