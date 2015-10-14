@@ -7,8 +7,7 @@ The Goal: A production ready Kubernetes cluster running (atm only) on GCE that i
 but is also capable to run on Vagrant.
 
 ## Status ##
-The Project isnt ready yet. Some modules are working right now but its not ready
-to deploy containers on it.
+**Work in Progress**
 
 ### Infrastructure ###
 
