@@ -13,7 +13,6 @@ module "network" {
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
     cluster_prefix = "${var.cluster_prefix}"
-    gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_name = "${var.gce_network_name}"
     gce_network_range = "${var.gce_network_range}"
@@ -31,8 +30,9 @@ module "etcd" {
     source = "modules/etcd"
 
     # provided by modules
-    ip ="${module.network.etcd_ip}"
+    lb_ip ="${module.network.etcd_ip}"
     network_name = "${module.network.network_name}"
+    etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
 
     # etcd vars
     etcd_count = "${var.etcd_count}"
@@ -46,7 +46,6 @@ module "etcd" {
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
     cluster_prefix = "${var.cluster_prefix}"
-    gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_range = "${var.gce_network_range}"
 
@@ -70,7 +69,6 @@ module "kubernetes-master" {
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
     cluster_prefix = "${var.cluster_prefix}"
-    gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_range = "${var.gce_network_range}"
 

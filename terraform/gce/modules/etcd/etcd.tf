@@ -50,6 +50,9 @@ resource "google_compute_firewall" "allow-etcd-internal" {
 resource "google_compute_target_pool" "etcd" {
     name = "${var.cluster_prefix}etcd-pool"
     health_checks = [ "${google_compute_http_health_check.etcd.name}" ]
+    depends_on = [
+        "google_compute_http_health_check.etcd",
+    ]
 }
 
 resource "google_compute_forwarding_rule" "etcd" {
@@ -59,6 +62,20 @@ resource "google_compute_forwarding_rule" "etcd" {
 
     depends_on = [
         "google_compute_target_pool.etcd",
+    ]
+}
+
+resource "template_file" "cloud_config" {
+    filename = "../../coreos/etcd.yml"
+
+    vars {
+        cluster_prefix = "${var.cluster_prefix}"
+        lb_ip          = "${var.lb_ip}"
+        etcd_cert_passphrase     = "${var.etcd_cert_passphrase}"
+    }
+
+    depends_on = [
+        "execute_command.set_discovery_url"
     ]
 }
 
@@ -86,7 +103,7 @@ resource "google_compute_instance_template" "etcd" {
     }
 
     metadata {
-        user-data = "${file("../../coreos/etcd.yml")}"
+        user-data = "${template_file.cloud_config.rendered}"
     }
 
     service_account {
@@ -94,7 +111,8 @@ resource "google_compute_instance_template" "etcd" {
     }
 
     depends_on = [
-        "execute_command.set_discovery_url"
+        "execute_command.set_discovery_url",
+        "template_file.cloud_config",
     ]
 }
 

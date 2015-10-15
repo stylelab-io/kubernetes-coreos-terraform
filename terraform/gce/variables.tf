@@ -7,7 +7,6 @@ variable "cluster_prefix" {
 
 # gce variables
 variable "gce_project" {}
-variable "gce_sshkey_metadata" {}
 variable "gce_account_file" {}
 
 variable "gce_zone" {
@@ -27,7 +26,9 @@ variable "gce_network_range" {
 }
 
 # certs
-variable "etcd_cert_passphrase" {}
+variable "etcd_cert_passphrase" {
+    default = ""
+}
 
 variable "etcd_cert_path" {
     default = "../../etcd-ca-files"

@@ -8,7 +8,8 @@ variable "etcd_image_disk_size" {}
 
 # vars from modules
 variable "network_name" {}
-variable "ip" {}
+variable "lb_ip" {}
+variable "etcd_cert_passphrase" {}
 
 # gce variables
 variable "gce_project" {}
@@ -16,7 +17,6 @@ variable "gce_zone" {}
 variable "gce_region" {}
 variable "gce_account_file" {}
 variable "cluster_prefix" {}
-variable "gce_sshkey_metadata" {}
 variable "gce_network_range" {}
 
 # flannel
