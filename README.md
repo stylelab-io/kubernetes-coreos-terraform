@@ -33,7 +33,7 @@ but is also capable to run on Vagrant.
 | Module     | Instance Templates   | Groupmanager | Pool   | Forwarding   | Healtcheck    | Firewall   | Network   |
 | ----------:|---------------------:| ------------:| ------:| ------------:| -------------:| ----------:| ---------:|
 | network    | -                    |-             |-       |-             |-              |x           |o          |
-| etcd2      | o                    |o             |o       |o             |o              |o           |o          |
+| etcd2      | o                    |o             |o       |x             |x              |o           |o          |
 | master     | o                    |o             |x       |x             |x              |x           |o          |
 | node       | x                    |x             |x       |x             |x              |x           |x          |
 
@@ -41,7 +41,7 @@ but is also capable to run on Vagrant.
 
 | Module     | Authentication | Authorization | Communication A | Communication B |
 | ----------:|---------------:|--------------:|----------------:|----------------:|
-| etcd2      | x                    |x   |x |x |
+| etcd2      | o                    |o   |o |o |
 | kube-master| x |x|x|x |
 | kube-node| x |x|x|x |
 
