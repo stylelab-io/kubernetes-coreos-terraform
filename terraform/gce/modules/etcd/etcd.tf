@@ -17,10 +17,10 @@ resource "google_compute_address" "etcd" {
 
 resource "google_compute_http_health_check" "etcd" {
     name = "${var.cluster_prefix}etcd-check"
-    request_path = "/v2/stats/self"
-    check_interval_sec = 5
-    timeout_sec = 2
-    port = 2379
+    request_path = "/health"
+    check_interval_sec = 60
+    timeout_sec = 45
+    port = 2350
 }
 
 resource "google_compute_firewall" "allow-etcd-external" {

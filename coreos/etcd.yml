@@ -22,6 +22,21 @@ write_files:
       After=generate-certs.service
       #[Service]
       #ExecStart=/usr/bin/echo "generate-certs.service finished let etcd starting"
+  - path: /etc/locofo/config.json
+    owner: root:root
+    permissions: 0644
+    content: |
+      {
+        "BindAddress": "0.0.0.0:2350",
+        "Commands": [
+          {
+            "Path": "/health",
+            "Command": "etcdctl",
+            "Args": "--cert-file /etc/ssl/private/$private_ipv4.crt --key-file /etc/ssl/private/$private_ipv4.key.insecure --ca-file /etc/ssl/private/ca.crt --endpoint https://$public_ipv4:2379 cluster-health |grep -E 'failed.*10.240.0.3'; test $? -eq 1"
+          }
+        ]
+      }
+
   - path: /opt/stylelounge/gen.sh
     owner: root:root
     permissions: 0755
@@ -35,7 +50,7 @@ write_files:
 coreos:
   etcd2:
     # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: "https://discovery.etcd.io/b91a621f5664d72f380bc7a04355d227"
+    discovery: "https://discovery.etcd.io/a6ae94524ab6e113c35d520cf3f8a733"
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: "https://$private_ipv4:2379,https://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"
@@ -77,5 +92,18 @@ coreos:
 
         RemainAfterExit=yes
         Type=oneshot
+    - name: locofo.service
+      command: start
+      content: |
+        [Unit]
+        Description=Locofo adds healthcheck support for http on gce
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+
+        [Service]
+        ExecStart=/opt/stvnwrgs/locofo /etc/locofo/config.json
+
+        Restart=always
+        RestartSec=5
     - name: etcd2.service
       command: start
