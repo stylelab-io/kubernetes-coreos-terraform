@@ -1,5 +1,6 @@
+# self_link? see: hashicorp/terraform#3226
 output "network_name" {
-    value = "${format("%s",google_compute_network.default.name)}"
+    value = "${google_compute_network.default.name}"
 }
 
 output "km_ip" {
@@ -10,18 +11,12 @@ output "etcd_ip" {
     value = "${google_compute_address.etcd.0.address}"
 }
 
-provider "google" {
-    account_file = "${file("${var.gce_account_file}")}"
-    project = "${var.gce_project}"
-    region = "${var.gce_region}"
-}
-
 resource "google_compute_address" "kmapi" {
-    name = "${var.gce_cluster_name}-kmapi-ip"
+    name = "${var.cluster_prefix}kmapi-ip"
 }
 
 resource "google_compute_address" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-ip"
+    name = "${var.cluster_prefix}etcd-ip"
 }
 
 resource "google_compute_network" "default" {

@@ -1,10 +1,12 @@
 # variable "" {}
 
 variable "image" {}
+variable "cluster_prefix" {
+    default = "test-"
+}
 
 # gce variables
 variable "gce_project" {}
-variable "gce_sshkey_metadata" {}
 variable "gce_account_file" {}
 
 variable "gce_zone" {
@@ -13,15 +15,23 @@ variable "gce_zone" {
 variable "gce_region" {
     default = "europe-west1"
 }
-variable "gce_cluster_name" {
-    default = "test-cluster"
-}
+
+# network
 variable "gce_network_name" {
     default = "default"
 }
 
 variable "gce_network_range" {
-    default ="10.10.0.0/16"
+    default ="10.240.0.0/16"
+}
+
+# certs
+variable "etcd_cert_passphrase" {
+    default = ""
+}
+
+variable "etcd_cert_path" {
+    default = "../../etcd-ca-files"
 }
 
 # flannel
@@ -34,7 +44,7 @@ variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
 variable "etcd_count" {
-    default = 1
+    default = 2
 }
 variable "etcd_data_disk_size" {
     default = 100

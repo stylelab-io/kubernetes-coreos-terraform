@@ -1,7 +1,7 @@
 provider "google" {
-    account_file = "${file("/Users/stevenwirges/google/stylelounge-1042.json")}"
-    project = "stylelounge-1042"
-    region = "europe-west1"
+    account_file = "${file("${var.gce_account_file}")}"
+    project = "${var.gce_project}"
+    region = "${var.gce_region}"
 }
 
 module "network" {
@@ -12,19 +12,27 @@ module "network" {
     gce_project = "${var.gce_project}"
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
-    gce_cluster_name = "${var.gce_cluster_name}"
-    gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
+    cluster_prefix = "${var.cluster_prefix}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_name = "${var.gce_network_name}"
     gce_network_range = "${var.gce_network_range}"
+}
+
+module "cert" {
+    source = "./modules/cert"
+
+    etcd_cert_path = "${var.etcd_cert_path}"
+    etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
+    cluster_prefix = "${var.cluster_prefix}"
 }
 
 module "etcd" {
     source = "modules/etcd"
 
     # provided by modules
-    ip ="${module.network.etcd_ip}"
+    lb_ip ="${module.network.etcd_ip}"
     network_name = "${module.network.network_name}"
+    etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
 
     # etcd vars
     etcd_count = "${var.etcd_count}"
@@ -37,8 +45,7 @@ module "etcd" {
     gce_project = "${var.gce_project}"
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
-    gce_cluster_name = "${var.gce_cluster_name}"
-    gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
+    cluster_prefix = "${var.cluster_prefix}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_range = "${var.gce_network_range}"
 
@@ -46,7 +53,7 @@ module "etcd" {
     flannel_network = "${var.flannel_network}"
 }
 
-
+/*
 module "kubernetes-master" {
     source = "modules/kubernetes-master"
 
@@ -61,15 +68,14 @@ module "kubernetes-master" {
     gce_project = "${var.gce_project}"
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
-    gce_cluster_name = "${var.gce_cluster_name}"
-    gce_sshkey_metadata = "${var.gce_sshkey_metadata}"
+    cluster_prefix = "${var.cluster_prefix}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_range = "${var.gce_network_range}"
 
     # flannel
     flannel_network = "${var.flannel_network}"
 
-}
+}*/
 /*
 module "kubernetes-node" {
     source = "modules/kubernetes-node"

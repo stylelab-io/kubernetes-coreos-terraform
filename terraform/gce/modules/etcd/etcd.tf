@@ -12,19 +12,31 @@ resource "execute_command" "set_discovery_url" {
 
 
 resource "google_compute_address" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-address"
+    name = "${var.cluster_prefix}etcd-address"
 }
 
 resource "google_compute_http_health_check" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-check"
-    request_path = "/v2/stats/self"
-    check_interval_sec = 5
-    timeout_sec = 2
-    port = 2379
+    name = "${var.cluster_prefix}etcd-check"
+    request_path = "/health"
+    check_interval_sec = 60
+    timeout_sec = 45
+    port = 2350
 }
 
-resource "google_compute_firewall" "allow-etcd-int" {
-    name = "${var.gce_cluster_name}-allow-etcd-int"
+resource "google_compute_firewall" "allow-etcd-external" {
+    name = "${var.cluster_prefix}allow-etcd-external"
+    network = "${var.network_name}"
+
+    allow {
+        protocol = "tcp"
+        ports = ["2379"]
+    }
+    source_ranges = ["0.0.0.0/0"]
+    target_tags = ["etcd"]
+}
+
+resource "google_compute_firewall" "allow-etcd-internal" {
+    name = "${var.cluster_prefix}allow-etcd-internal"
     network = "${var.network_name}"
 
     allow {
@@ -36,12 +48,15 @@ resource "google_compute_firewall" "allow-etcd-int" {
 }
 
 resource "google_compute_target_pool" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-pool"
+    name = "${var.cluster_prefix}etcd-pool"
     health_checks = [ "${google_compute_http_health_check.etcd.name}" ]
+    depends_on = [
+        "google_compute_http_health_check.etcd",
+    ]
 }
 
 resource "google_compute_forwarding_rule" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-forwarding"
+    name = "${var.cluster_prefix}etcd-forwarding"
     target = "${google_compute_target_pool.etcd.self_link}"
     port_range = "2379-2380"
 
@@ -50,8 +65,22 @@ resource "google_compute_forwarding_rule" "etcd" {
     ]
 }
 
+resource "template_file" "cloud_config" {
+    filename = "../../coreos/etcd.yml"
+
+    vars {
+        cluster_prefix = "${var.cluster_prefix}"
+        lb_ip          = "${var.lb_ip}"
+        etcd_cert_passphrase     = "${var.etcd_cert_passphrase}"
+    }
+
+    depends_on = [
+        "execute_command.set_discovery_url"
+    ]
+}
+
 resource "google_compute_instance_template" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-template"
+    name = "${var.cluster_prefix}etcd-template"
     description = "A template for etcd2 instances"
     instance_description = "A etcd2 node"
     machine_type = "n1-standard-1"
@@ -67,14 +96,14 @@ resource "google_compute_instance_template" "etcd" {
     }
 
     network_interface {
-        network = "${var.network_name}"
+        network = "${var.network_name.self_link}"
         access_config {
             // Ephemeral IP
         }
     }
 
     metadata {
-        user-data = "${file("../../coreos/etcd.yml")}"
+        user-data = "${template_file.cloud_config.rendered}"
     }
 
     service_account {
@@ -82,16 +111,17 @@ resource "google_compute_instance_template" "etcd" {
     }
 
     depends_on = [
-        "execute_command.set_discovery_url"
+        "execute_command.set_discovery_url",
+        "template_file.cloud_config",
     ]
 }
 
 resource "google_compute_instance_group_manager" "etcd" {
-    name = "${var.gce_cluster_name}-etcd-group-manager"
+    name = "${var.cluster_prefix}etcd-group-manager"
     description = "Terraform test instance group manager"
     instance_template = "${google_compute_instance_template.etcd.self_link}"
     target_pools = ["${google_compute_target_pool.etcd.self_link}"]
-    base_instance_name = "${var.gce_cluster_name}-etcd"
+    base_instance_name = "${var.cluster_prefix}etcd"
     zone = "${var.gce_zone}"
     target_size = "${var.etcd_count}"
 

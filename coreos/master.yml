@@ -1,5 +1,4 @@
 #cloud-config
-
 ---
 write-files:
   - path: /etc/conf.d/nfs
@@ -19,38 +18,7 @@ write-files:
 
 hostname: master
 coreos:
-  etcd2:
-    name: master
-    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
-    initial-cluster-token: k8s_etcd
-    listen-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
-    initial-advertise-peer-urls: http://$private_ipv4:2380
-    initial-cluster: master=http://$private_ipv4:2380
-    initial-cluster-state: new
-  # etcd2:
-  #   discovery: "https://discovery.etcd.io/f8a4fb906cfeb8302ab35999ef580fab"
-  #   # multi-region and multi-cloud deployments need to use $public_ipv4
-  #   advertise-client-urls: "http://$public_ipv4:2379,http://$private_ipv4:4001"
-  #   initial-advertise-peer-urls: "http://$private_ipv4:2380,http://$private_ipv4:7001"
-  #   # listen on both the official ports and the legacy ports
-  #   # legacy ports can be omitted if your application doesn't depend on them
-  #   listen-client-urls: "http://0.0.0.0:2379,http://0.0.0.0:4001"
-  #   listen-peer-urls: "http://$private_ipv4:2380,http://$private_ipv4:7001"
-  # fleet:
-  #   metadata: "role=master"
   units:
-    # - name: generate-serviceaccount-key.service
-    #   command: start
-    #   content: |
-    #     [Unit]
-    #     Description=Generate service-account key file
-    #
-    #     [Service]
-    #     ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-    #     ExecStart=/bin/openssl genrsa -out /opt/bin/kube-serviceaccount.key 2048 2>/dev/null
-    #     RemainAfterExit=yes
-    #     Type=oneshot
     - name: setup-network-environment.service
       command: start
       content: |
@@ -67,17 +35,6 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-#    - name: fleet.service
-#      command: start
-#    - name: flanneld.service
-#      command: start
-#      drop-ins:
-#        - name: 50-network-config.conf
-#          content: |
-#            [Unit]
-#            Requires=etcd2.service
-#            [Service]
-#            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}'
     - name: docker.service
       command: start
     - name: kube-apiserver.service
@@ -86,16 +43,12 @@ coreos:
         [Unit]
         Description=Kubernetes API Server
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        Requires=setup-network-environment.service etcd2.service generate-serviceaccount-key.service
-        After=setup-network-environment.service etcd2.service generate-serviceaccount-key.service
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStartPre=-/usr/bin/mkdir -p /opt/bin
-        ExecStartPre=/usr/bin/curl -L -o /opt/bin/kube-apiserver -z /opt/bin/kube-apiserver https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64/kube-apiserver
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-apiserver
-        ExecStart=/opt/bin/kube-apiserver \
-        --service-account-key-file=/opt/bin/kube-serviceaccount.key \
-        --service-account-lookup=false \
+        ExecStart=/opt/kubernetes/hyperkube kube-apiserver \
+        --basic-auth-file=/
         --admission-control=NamespaceLifecycle,NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
         --runtime-config=api/v1 \
         --allow-privileged=true \
@@ -103,7 +56,7 @@ coreos:
         --insecure-port=8080 \
         --kubelet-https=true \
         --secure-port=443 \
-        --service-cluster-ip-range=10.100.0.0/16 \
+        --service-cluster-ip-range=10.40.0.0/16 \
         --etcd-servers=http://127.0.0.1:2379 \
         --logtostderr=true
         Restart=always
