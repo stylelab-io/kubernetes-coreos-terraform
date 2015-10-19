@@ -1,5 +1,5 @@
 resource "google_compute_http_health_check" "kubernetes-master" {
-    name = "${var.gce_cluster_name}-kube-master"
+    name = "${var.cluster_prefix}kube-master"
     request_path = "/v2/stats/self"
     check_interval_sec = 5
     timeout_sec = 1
@@ -7,7 +7,7 @@ resource "google_compute_http_health_check" "kubernetes-master" {
 }
 
 resource "google_compute_firewall" "kube-internal" {
-    name = "${var.gce_cluster_name}-allow-kube-master-internal"
+    name = "${var.cluster_prefix}allow-kube-master-internal"
     network = "${var.network_name}"
 
     allow {
@@ -19,7 +19,7 @@ resource "google_compute_firewall" "kube-internal" {
 }
 
 resource "google_compute_firewall" "kube-external" {
-    name = "${var.gce_cluster_name}-allow-kube-master-external"
+    name = "${var.cluster_prefix}allow-kube-master-external"
     network = "${var.network_name}"
 
     allow {
@@ -38,12 +38,12 @@ resource "template_file" "cloud_config" {
 }
 
 resource "google_compute_target_pool" "kubernetes-master" {
-    name = "${var.gce_cluster_name}-kube-master"
+    name = "${var.cluster_prefix}kube-master"
     health_checks = [ "${google_compute_http_health_check.kubernetes-master.name}" ]
 }
 
 resource "google_compute_instance_template" "kubernetes-master" {
-    name = "${var.gce_cluster_name}-kube-master-template"
+    name = "${var.cluster_prefix}kube-master-template"
     description = "Kubernetes Master instance template"
     instance_description = "Kubernetes Master instace"
     machine_type = "n1-standard-1"
@@ -80,7 +80,7 @@ resource "google_compute_instance_template" "kubernetes-master" {
 
 resource "google_compute_instance_group_manager" "kubernetes-master" {
     description = "Terraform test instance group manager"
-    name = "${var.gce_cluster_name}-kubernetes-master"
+    name = "${var.cluster_prefix}kubernetes-master"
     instance_template = "${google_compute_instance_template.kubernetes-master.self_link}"
     target_pools = ["${google_compute_target_pool.kubernetes-master.self_link}"]
     base_instance_name = "kube-master"

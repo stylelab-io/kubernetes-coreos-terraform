@@ -28,11 +28,17 @@ write_files:
     content: |
       {
         "BindAddress": "0.0.0.0:2350",
-        "Commands": [
+        "Certs": {
+          "CaFile": "/etc/ssl/private/ca.crt",
+          "CertFile": "/etc/ssl/private/$private_ipv4.crt",
+          "KeyFile": "/etc/ssl/private/$private_ipv4.key.insecure"
+        },
+        "Server": "https://$private_ipv4:2379",
+        "Paths": [
           {
-            "Path": "/health",
-            "Command": "etcdctl",
-            "Args": "--cert-file /etc/ssl/private/$private_ipv4.crt --key-file /etc/ssl/private/$private_ipv4.key.insecure --ca-file /etc/ssl/private/ca.crt --endpoint https://$public_ipv4:2379 cluster-health |grep -E 'failed.*10.240.0.3'; test $? -eq 1"
+            "In": "/health",
+            "Out": "/health",
+            "ValidationRegex": "{\"health\": \"true\"}"
           }
         ]
       }
@@ -50,7 +56,7 @@ write_files:
 coreos:
   etcd2:
     # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: "https://discovery.etcd.io/1bfac9fd27cbd1c460c73020556cda92"
+    discovery: "https://discovery.etcd.io/fc3b9938bdb947926b3fd5407dfc4e80"
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: "https://$private_ipv4:2379,https://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"

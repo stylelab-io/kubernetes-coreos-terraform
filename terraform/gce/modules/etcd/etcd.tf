@@ -18,8 +18,8 @@ resource "google_compute_address" "etcd" {
 resource "google_compute_http_health_check" "etcd" {
     name = "${var.cluster_prefix}etcd-check"
     request_path = "/health"
-    check_interval_sec = 60
-    timeout_sec = 45
+    check_interval_sec = 5
+    timeout_sec = 3
     port = 2350
 }
 
