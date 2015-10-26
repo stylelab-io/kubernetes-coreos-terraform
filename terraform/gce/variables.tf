@@ -26,12 +26,12 @@ variable "gce_network_range" {
 }
 
 # certs
-variable "etcd_cert_passphrase" {
+variable "cert_passphrase" {
     default = ""
 }
 
-variable "etcd_cert_path" {
-    default = "../../etcd-ca-files"
+variable "cert_path" {
+    default = "../../cert-files"
 }
 
 # flannel
@@ -44,7 +44,7 @@ variable "etcd_machine_type" {
     default = "n1-standard-1"
 }
 variable "etcd_count" {
-    default = 2
+    default = 3
 }
 variable "etcd_data_disk_size" {
     default = 100

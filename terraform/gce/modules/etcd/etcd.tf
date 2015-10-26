@@ -71,7 +71,7 @@ resource "template_file" "cloud_config" {
     vars {
         cluster_prefix = "${var.cluster_prefix}"
         lb_ip          = "${var.lb_ip}"
-        etcd_cert_passphrase     = "${var.etcd_cert_passphrase}"
+        cert_passphrase     = "${var.cert_passphrase}"
     }
 
     depends_on = [

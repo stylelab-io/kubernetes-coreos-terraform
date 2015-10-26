@@ -9,7 +9,7 @@ variable "etcd_image_disk_size" {}
 # vars from modules
 variable "network_name" {}
 variable "lb_ip" {}
-variable "etcd_cert_passphrase" {}
+variable "cert_passphrase" {}
 
 # gce variables
 variable "gce_project" {}
