@@ -21,8 +21,8 @@ module "network" {
 module "cert" {
     source = "./modules/cert"
 
-    etcd_cert_path = "${var.etcd_cert_path}"
-    etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
+    cert_path = "${var.cert_path}"
+    cert_passphrase = "${var.cert_passphrase}"
     cluster_prefix = "${var.cluster_prefix}"
 }
 
@@ -32,7 +32,10 @@ module "etcd" {
     # provided by modules
     lb_ip ="${module.network.etcd_ip}"
     network_name = "${module.network.network_name}"
-    etcd_cert_passphrase = "${var.etcd_cert_passphrase}"
+    cert_passphrase = "${var.cert_passphrase}"
+
+    # general
+    domain = "${var.domain}"
 
     # etcd vars
     etcd_count = "${var.etcd_count}"
@@ -53,7 +56,7 @@ module "etcd" {
     flannel_network = "${var.flannel_network}"
 }
 
-/*
+
 module "kubernetes-master" {
     source = "modules/kubernetes-master"
 
@@ -75,7 +78,7 @@ module "kubernetes-master" {
     # flannel
     flannel_network = "${var.flannel_network}"
 
-}*/
+}
 /*
 module "kubernetes-node" {
     source = "modules/kubernetes-node"

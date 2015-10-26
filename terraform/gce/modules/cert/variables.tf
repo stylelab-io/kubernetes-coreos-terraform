@@ -1,3 +1,3 @@
-variable "etcd_cert_path" {}
-variable "etcd_cert_passphrase" {}
+variable "cert_path" {}
+variable "cert_passphrase" {}
 variable "cluster_prefix" {}
