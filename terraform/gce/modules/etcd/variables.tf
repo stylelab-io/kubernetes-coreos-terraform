@@ -1,4 +1,7 @@
 # variable "" {}
+
+variable "domain" {}
+
 #etcd
 variable "etcd_count" {}
 variable "etcd_image" {}
