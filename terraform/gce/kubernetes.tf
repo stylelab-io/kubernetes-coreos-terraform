@@ -34,6 +34,9 @@ module "etcd" {
     network_name = "${module.network.network_name}"
     cert_passphrase = "${var.cert_passphrase}"
 
+    # general
+    domain = "${var.domain}"
+
     # etcd vars
     etcd_count = "${var.etcd_count}"
     etcd_image = "${var.image}"

@@ -47,16 +47,16 @@ write_files:
     owner: root:root
     permissions: 0755
     content: |
-      cd /etc/ssl/private && /opt/etcd/etcd-ca new-cert --passphrase="${etcd_cert_passphrase}" -ip 127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip} $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca sign --passphrase="${etcd_cert_passphrase}" $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca export --passphrase="${etcd_cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
+      cd /etc/ssl/private && /opt/etcd/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
+      cd /etc/ssl/private && /opt/etcd/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
+      cd /etc/ssl/private && /opt/etcd/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
       cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
 coreos:
   etcd2:
     # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: "https://discovery.etcd.io/fc3b9938bdb947926b3fd5407dfc4e80"
+    discovery: "https://discovery.etcd.io/f15b24a2430d7f7def72a4d8989166a1"
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: "https://$private_ipv4:2379,https://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"

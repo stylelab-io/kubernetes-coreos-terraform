@@ -5,6 +5,8 @@ variable "cluster_prefix" {
     default = "test-"
 }
 
+variable "domain" {}
+
 # gce variables
 variable "gce_project" {}
 variable "gce_account_file" {}

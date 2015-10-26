@@ -69,9 +69,10 @@ resource "template_file" "cloud_config" {
     filename = "../../coreos/etcd.yml"
 
     vars {
-        cluster_prefix = "${var.cluster_prefix}"
-        lb_ip          = "${var.lb_ip}"
+        cluster_prefix      = "${var.cluster_prefix}"
+        lb_ip               = "${var.lb_ip}"
         cert_passphrase     = "${var.cert_passphrase}"
+        domain              = "${var.domain}"
     }
 
     depends_on = [
