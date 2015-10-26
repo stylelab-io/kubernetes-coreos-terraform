@@ -7,8 +7,6 @@ provider "google" {
 module "network" {
     source = "./modules/network"
 
-    km_count = "${var.km_count}"
-
     gce_project = "${var.gce_project}"
     gce_region = "${var.gce_region}"
     gce_zone = "${var.gce_zone}"
@@ -33,8 +31,6 @@ module "etcd" {
     lb_ip ="${module.network.etcd_ip}"
     network_name = "${module.network.network_name}"
     cert_passphrase = "${var.cert_passphrase}"
-
-    # general
     domain = "${var.domain}"
 
     # etcd vars
@@ -60,9 +56,11 @@ module "etcd" {
 module "kubernetes-master" {
     source = "modules/kubernetes-master"
 
+    domain = "${var.domain}"
     etcd_address = "${module.etcd.pub_address}"
-    ip ="${module.network.km_ip}"
+    lb_ip ="${module.network.km_ip}"
     network_name = "${module.network.network_name}"
+    cert_passphrase = "${var.cert_passphrase}"
 
     kube_image = "${var.image}"
     km_count = "${var.km_count}"

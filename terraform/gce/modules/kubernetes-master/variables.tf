@@ -1,7 +1,10 @@
 #variable "etcd_address" {}
 
+variable "domain" {}
+variable "cert_passphrase" {}
+
 variable "etcd_address" {}
-variable "ip" {}
+variable "lb_ip" {}
 variable "network_name" {}
 variable "kube_image" {}
 

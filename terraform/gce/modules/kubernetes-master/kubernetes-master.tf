@@ -33,7 +33,10 @@ resource "google_compute_firewall" "kube-external" {
 resource "template_file" "cloud_config" {
     filename = "../../coreos/master.yml"
     vars {
-      #  etcd_address = "${var.etcd_address}"
+      cluster_prefix      = "${var.cluster_prefix}"
+      lb_ip               = "${var.lb_ip}"
+      cert_passphrase     = "${var.cert_passphrase}"
+      domain              = "${var.domain}"
     }
 }
 

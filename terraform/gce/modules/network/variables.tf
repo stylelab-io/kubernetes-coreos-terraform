@@ -1,7 +1,5 @@
 # variable "" {}
 
-variable "km_count" {}
-
 # gce variables
 variable "gce_project" {}
 variable "gce_zone" {}

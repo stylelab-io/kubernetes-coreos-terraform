@@ -15,6 +15,16 @@ write-files:
           sleep 1 && echo .;
         done;
       exit $?
+  - path: /opt/stylelounge/gen.sh
+    owner: root:root
+    permissions: 0755
+    content: |
+      cd /etc/ssl/private && /opt/etcd/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
+      cd /etc/ssl/private && /opt/etcd/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
+      cd /etc/ssl/private && /opt/etcd/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
+      cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
+      chmod 755 /etc/ssl/private
+      cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
 
 hostname: master
 coreos:
@@ -37,6 +47,23 @@ coreos:
         Type=oneshot
     - name: docker.service
       command: start
+    - name: generate-certs.service
+      command: start
+      content: |
+        [Unit]
+        Description=Create certificates for etcd
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+
+        [Service]
+        ExecStartPre=/bin/mkdir -p /etc/ssl/private/.etcd-ca || yes
+        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
+        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
+        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
+        ExecStart=/usr/bin/bash /opt/stylelounge/gen.sh
+
+        RemainAfterExit=yes
+        Type=oneshot
     - name: kube-apiserver.service
       command: start
       content: |
@@ -44,7 +71,7 @@ coreos:
         Description=Kubernetes API Server
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
         Requires=setup-network-environment.service
-        After=setup-network-environment.service
+        After=generate-certs.service
         [Service]
         EnvironmentFile=/etc/network-environment
         ExecStart=/opt/kubernetes/hyperkube kube-apiserver \
@@ -61,39 +88,39 @@ coreos:
         --logtostderr=true
         Restart=always
         RestartSec=10
-    - name: kube-controller-manager.service
-      command: start
-      content: |
-        [Unit]
-        Description=Kubernetes Controller Manager
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        Requires=kube-apiserver.service
-        After=kube-apiserver.service
-
-        [Service]
-        ExecStartPre=/usr/bin/curl -L -o /opt/bin/kube-controller-manager -z /opt/bin/kube-controller-manager https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64/kube-controller-manager
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
-        ExecStart=/opt/bin/kube-controller-manager \
-        --service-account-private-key-file=/opt/bin/kube-serviceaccount.key \
-        --master=127.0.0.1:8080 \
-        --logtostderr=true
-        Restart=always
-        RestartSec=10
-    - name: kube-scheduler.service
-      command: start
-      content: |
-        [Unit]
-        Description=Kubernetes Scheduler
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        Requires=kube-apiserver.service
-        After=kube-apiserver.service
-
-        [Service]
-        ExecStartPre=/usr/bin/curl -L -o /opt/bin/kube-scheduler -z /opt/bin/kube-scheduler https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64/kube-scheduler
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
-        ExecStart=/opt/bin/kube-scheduler --master=127.0.0.1:8080
-        Restart=always
-        RestartSec=10
+    # - name: kube-controller-manager.service
+    #   command: start
+    #   content: |
+    #     [Unit]
+    #     Description=Kubernetes Controller Manager
+    #     Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+    #     Requires=kube-apiserver.service
+    #     After=kube-apiserver.service
+    #
+    #     [Service]
+    #     ExecStartPre=/usr/bin/curl -L -o /opt/bin/kube-controller-manager -z /opt/bin/kube-controller-manager https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64/kube-controller-manager
+    #     ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-controller-manager
+    #     ExecStart=/opt/bin/kube-controller-manager \
+    #     --service-account-private-key-file=/opt/bin/kube-serviceaccount.key \
+    #     --master=127.0.0.1:8080 \
+    #     --logtostderr=true
+    #     Restart=always
+    #     RestartSec=10
+    # - name: kube-scheduler.service
+    #   command: start
+    #   content: |
+    #     [Unit]
+    #     Description=Kubernetes Scheduler
+    #     Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+    #     Requires=kube-apiserver.service
+    #     After=kube-apiserver.service
+    #
+    #     [Service]
+    #     ExecStartPre=/usr/bin/curl -L -o /opt/bin/kube-scheduler -z /opt/bin/kube-scheduler https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64/kube-scheduler
+    #     ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-scheduler
+    #     ExecStart=/opt/bin/kube-scheduler --master=127.0.0.1:8080
+    #     Restart=always
+    #     RestartSec=10
   update:
     group: alpha
     reboot-strategy: off
