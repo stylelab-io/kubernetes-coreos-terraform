@@ -1,4 +1,4 @@
-resource "google_compute_http_health_check" "kubernetes-node" {
+/*resource "google_compute_http_health_check" "kubernetes-node" {
     name = "kubernetes-node"
     request_path = "/v2/stats/self"
     check_interval_sec = 5
@@ -9,12 +9,11 @@ resource "google_compute_http_health_check" "kubernetes-node" {
 resource "google_compute_target_pool" "kubernetes-node" {
     name = "kubernetes-node"
     health_checks = [ "${google_compute_http_health_check.kubernetes-node.name}" ]
-}
+}*/
 
 resource "google_compute_instance_template" "kubernetes-node" {
     name = "kubernetes-node-template"
-    description = "template description"
-    instance_description = "description assigned to instances"
+    instance_description = "kubernetes-node"
     machine_type = "n1-standard-1"
     can_ip_forward = false
     automatic_restart = true
@@ -23,7 +22,7 @@ resource "google_compute_instance_template" "kubernetes-node" {
 
     # Create a new boot disk from an image
     disk {
-        source_image = "coreos-alpha-815-0-0-v20150924"
+        source_image = "${var.kube_image}"
         auto_delete = true
         boot = true
     }

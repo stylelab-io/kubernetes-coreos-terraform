@@ -1,5 +1,5 @@
 output "kube_master_ip" {
-    value = "${google_compute_address.master}"
+    value = "${google_compute_address.kube-master.ip_address}"
 }
 
 resource "google_compute_address" "kube-master" {
@@ -8,10 +8,10 @@ resource "google_compute_address" "kube-master" {
 
 resource "google_compute_http_health_check" "kube-master" {
     name = "${var.cluster_prefix}kube-master"
-    request_path = "/v2/stats/self"
+    request_path = "/health"
     check_interval_sec = 5
     timeout_sec = 1
-    port = 2379
+    port = 8090
 }
 
 resource "google_compute_target_pool" "kube-master" {
@@ -21,12 +21,19 @@ resource "google_compute_target_pool" "kube-master" {
 
 resource "google_compute_forwarding_rule" "kube-master" {
     name = "${var.cluster_prefix}kube-master-forw"
-    target = "${google_compute_target_pool.etcd.self_link}"
-    port_range = "443,8080"
+    target = "${google_compute_target_pool.kube-master.self_link}"
 
     depends_on = [
         "google_compute_target_pool.kube-master",
     ]
+}
+
+resource "google_dns_record_set" "kube-master" {
+    managed_zone = "snm-tools"
+    name = "kube-master-lb.${var.domain}."
+    type = "A"
+    ttl = 60
+    rrdatas = ["${google_compute_forwarding_rule.kube-master.ip_address}"]
 }
 
 resource "google_compute_firewall" "kube-internal" {

@@ -80,4 +80,25 @@ module "kubernetes-master" {
 /*
 module "kubernetes-node" {
     source = "modules/kubernetes-node"
+
+    domain = "${var.domain}"
+    #etcd_address = "${module.etcd.pub_address}"
+    lb_ip ="${module.network.km_ip}"
+    network_name = "${module.network.network_name}"
+    cert_passphrase = "${var.cert_passphrase}"
+
+    kube_image = "${var.image}"
+    km_count = "${var.km_count}"
+
+    #gce vars
+    gce_project = "${var.gce_project}"
+    gce_region = "${var.gce_region}"
+    gce_zone = "${var.gce_zone}"
+    cluster_prefix = "${var.cluster_prefix}"
+    gce_account_file = "${var.gce_account_file}"
+    gce_network_range = "${var.gce_network_range}"
+
+    # flannel
+    flannel_network = "${var.flannel_network}"
+
 }*/

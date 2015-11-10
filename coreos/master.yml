@@ -74,6 +74,26 @@ write-files:
         user:
           client-certificate: /etc/ssl/private/$private_ipv4.crt
           client-key: /etc/ssl/private/$private_ipv4.key.insecure
+  - path: /etc/locofo/config.json
+    owner: root:root
+    permissions: 0644
+    content: |
+      {
+        "BindAddress": "0.0.0.0:8090",
+        "Certs": {
+          "CaFile": "/etc/ssl/private/ca.crt",
+          "CertFile": "/etc/ssl/private/$private_ipv4.crt",
+          "KeyFile": "/etc/ssl/private/$private_ipv4.key.insecure"
+        },
+        "Server": "https://$private_ipv4:443",
+        "Paths": [
+          {
+            "In": "/health",
+            "Out": "/healthz/ping",
+            "ValidationRegex": "ok"
+          }
+        ]
+      }
 
 hostname: master
 coreos:
@@ -141,6 +161,20 @@ coreos:
         --logtostderr=true
         Restart=always
         RestartSec=10
+    - name: locofo.service
+      command: start
+      content: |
+        [Unit]
+        Description=Locofo adds healthcheck support for http on gce
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStart=/opt/stvnwrgs/locofo-linux64 /etc/locofo/config.json
+
+        Restart=always
+        RestartSec=5
     - name: kube-controller-manager.service
       command: start
       content: |
