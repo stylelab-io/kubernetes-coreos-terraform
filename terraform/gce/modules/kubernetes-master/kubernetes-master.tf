@@ -1,9 +1,32 @@
-resource "google_compute_http_health_check" "kubernetes-master" {
+output "kube_master_ip" {
+    value = "${google_compute_address.master}"
+}
+
+resource "google_compute_address" "kube-master" {
+    name = "${var.cluster_prefix}kube-master-ip"
+}
+
+resource "google_compute_http_health_check" "kube-master" {
     name = "${var.cluster_prefix}kube-master"
     request_path = "/v2/stats/self"
     check_interval_sec = 5
     timeout_sec = 1
     port = 2379
+}
+
+resource "google_compute_target_pool" "kube-master" {
+    name = "${var.cluster_prefix}kube-master"
+    health_checks = [ "${google_compute_http_health_check.kube-master.name}" ]
+}
+
+resource "google_compute_forwarding_rule" "kube-master" {
+    name = "${var.cluster_prefix}kube-master-forw"
+    target = "${google_compute_target_pool.etcd.self_link}"
+    port_range = "443,8080"
+
+    depends_on = [
+        "google_compute_target_pool.kube-master",
+    ]
 }
 
 resource "google_compute_firewall" "kube-internal" {
@@ -41,15 +64,12 @@ resource "template_file" "cloud_config" {
     }
 }
 
-resource "google_compute_target_pool" "kubernetes-master" {
-    name = "${var.cluster_prefix}kube-master"
-    health_checks = [ "${google_compute_http_health_check.kubernetes-master.name}" ]
-}
 
-resource "google_compute_instance_template" "kubernetes-master" {
+
+resource "google_compute_instance_template" "kube-master" {
     name = "${var.cluster_prefix}kube-master-template"
-    description = "Kubernetes Master instance template"
-    instance_description = "Kubernetes Master instace"
+    description = "Kube Master instance template"
+    instance_description = "Kube Master instace"
     machine_type = "n1-standard-1"
     can_ip_forward = true
     automatic_restart = true
@@ -82,16 +102,16 @@ resource "google_compute_instance_template" "kubernetes-master" {
     ]
 }
 
-resource "google_compute_instance_group_manager" "kubernetes-master" {
+resource "google_compute_instance_group_manager" "kube-master" {
     description = "Terraform test instance group manager"
-    name = "${var.cluster_prefix}kubernetes-master"
-    instance_template = "${google_compute_instance_template.kubernetes-master.self_link}"
-    target_pools = ["${google_compute_target_pool.kubernetes-master.self_link}"]
+    name = "${var.cluster_prefix}kube-master"
+    instance_template = "${google_compute_instance_template.kube-master.self_link}"
+    target_pools = ["${google_compute_target_pool.kube-master.self_link}"]
     base_instance_name = "${var.cluster_prefix}kube-master"
     zone = "${var.gce_zone}"
     target_size = "${var.km_count}"
     depends_on = [
-        "google_compute_instance_template.kubernetes-master",
-        "google_compute_target_pool.kubernetes-master",
+        "google_compute_instance_template.kube-master",
+        "google_compute_target_pool.kube-master",
     ]
 }
