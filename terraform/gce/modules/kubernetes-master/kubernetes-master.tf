@@ -33,10 +33,11 @@ resource "google_compute_firewall" "kube-external" {
 resource "template_file" "cloud_config" {
     filename = "../../coreos/master.yml"
     vars {
-      cluster_prefix      = "${var.cluster_prefix}"
-      lb_ip               = "${var.lb_ip}"
-      cert_passphrase     = "${var.cert_passphrase}"
-      domain              = "${var.domain}"
+      cluster_prefix    = "${var.cluster_prefix}"
+      lb_ip             = "${var.lb_ip}"
+      cert_passphrase   = "${var.cert_passphrase}"
+      domain            = "${var.domain}"
+      cloud_provider    = "gce"
     }
 }
 
@@ -53,11 +54,11 @@ resource "google_compute_instance_template" "kubernetes-master" {
     can_ip_forward = true
     automatic_restart = true
     on_host_maintenance = "MIGRATE"
-    tags = ["kube-master"]
+    tags = ["kube-master", "web"]
 
     # Create a new boot disk from an image
     disk {
-        source_image = "coreos-alpha-815-0-0-v20150924"
+        source_image = "${var.kube_image}"
         auto_delete = true
         boot = true
     }
@@ -86,7 +87,7 @@ resource "google_compute_instance_group_manager" "kubernetes-master" {
     name = "${var.cluster_prefix}kubernetes-master"
     instance_template = "${google_compute_instance_template.kubernetes-master.self_link}"
     target_pools = ["${google_compute_target_pool.kubernetes-master.self_link}"]
-    base_instance_name = "kube-master"
+    base_instance_name = "${var.cluster_prefix}kube-master"
     zone = "${var.gce_zone}"
     target_size = "${var.km_count}"
     depends_on = [

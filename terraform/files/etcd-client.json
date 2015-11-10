@@ -1,0 +1,14 @@
+{
+  "cluster": {
+    "machines": [ "https://${hostname}:2379" ]
+  },
+  "config": {
+    "certFile": "${certfile}",
+    "keyFile": "${certkeyfile}",
+    "caCertFiles": [
+      "${cacertfile}"
+    ],
+    "timeout": 5000000000,
+    "consistency": "WEAK"
+  }
+}
