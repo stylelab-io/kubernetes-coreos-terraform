@@ -67,12 +67,11 @@ resource "google_compute_forwarding_rule" "etcd" {
 
 resource "google_dns_record_set" "etcd" {
     managed_zone = "snm-tools"
-    name = "etcd-lb.snm.tools."
+    name = "etcd-lb.${var.domain}."
     type = "A"
     ttl = 60
     rrdatas = ["${google_compute_forwarding_rule.etcd.ip_address}"]
 }
-
 
 resource "template_file" "cloud_config" {
     filename = "../../coreos/etcd.yml"
