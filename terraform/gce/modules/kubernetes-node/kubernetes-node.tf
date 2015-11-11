@@ -1,24 +1,11 @@
-/*resource "google_compute_http_health_check" "kubernetes-node" {
-    name = "kubernetes-node"
-    request_path = "/v2/stats/self"
-    check_interval_sec = 5
-    timeout_sec = 1
-    port = 2379
-}
-
-resource "google_compute_target_pool" "kubernetes-node" {
-    name = "kubernetes-node"
-    health_checks = [ "${google_compute_http_health_check.kubernetes-node.name}" ]
-}*/
-
-resource "google_compute_instance_template" "kubernetes-node" {
-    name = "kubernetes-node-template"
-    instance_description = "kubernetes-node"
+resource "google_compute_instance_template" "kube-node" {
+    name = "kube-node-template"
+    instance_description = "kube-node"
     machine_type = "n1-standard-1"
     can_ip_forward = false
     automatic_restart = true
     on_host_maintenance = "MIGRATE"
-    tags = ["kubernetes-node"]
+    tags = ["kube-node"]
 
     # Create a new boot disk from an image
     disk {
@@ -43,12 +30,16 @@ resource "google_compute_instance_template" "kubernetes-node" {
     }
 }
 
-resource "google_compute_instance_group_manager" "kubernetes-node" {
+resource "google_compute_target_pool" "foobar" {
+    name = "foobar"
+}
+
+resource "google_compute_instance_group_manager" "kube-node" {
     description = "Terraform test instance group manager"
-    name = "kubernetes-node"
-    instance_template = "${google_compute_instance_template.kubernetes-node.self_link}"
-    target_pools = ["${google_compute_target_pool.kubernetes-node.self_link}"]
-    base_instance_name = "kubernetes-node"
+    name = "kube-node"
+    instance_template = "${google_compute_instance_template.kube-node.self_link}"
+    target_pools = ["${google_compute_target_pool.kube-node.self_link}"]
+    base_instance_name = "kube-node"
     zone = "europe-west1-b"
     target_size = 1
 }
