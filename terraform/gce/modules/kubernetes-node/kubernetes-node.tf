@@ -30,8 +30,22 @@ resource "google_compute_instance_template" "kube-node" {
     }
 }
 
-resource "google_compute_target_pool" "foobar" {
-    name = "foobar"
+resource "google_compute_target_pool" "kube-node" {
+    name = "kube-node-pool"
+}
+
+resource "google_compute_autoscaler" "kube-node" {
+    name = "kube-node-autoscaler"
+    zone = "us-central1-f"
+    target = "${google_compute_instance_group_manager.foobar.self_link}"
+    autoscaling_policy = {
+        max_replicas = 5
+        min_replicas = 1
+        cooldown_period = 60
+        cpu_utilization = {
+            target = 0.5
+        }
+    }
 }
 
 resource "google_compute_instance_group_manager" "kube-node" {

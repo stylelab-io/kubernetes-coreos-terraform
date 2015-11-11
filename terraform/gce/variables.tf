@@ -66,15 +66,15 @@ variable "km_count" {
     default = 1
 }
 
-variable "kw_machine_type" {
+variable "kn_machine_type" {
     default = "n1-standard-1"
 }
-variable "kw_disk_size" {
+variable "kn_disk_size" {
     default = 30
 }
-variable "kw_image" {
+variable "kn_image" {
     default = "coreos-stable-766-3-0-v20150908"
 }
-variable "kw_count" {
+variable "kn_count" {
     default = 1
 }
