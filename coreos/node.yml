@@ -117,8 +117,6 @@ coreos:
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
           --hostname-override=$private_ipv4 \
-          --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
-          --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
           --cadvisor-port=0
 
         Restart=always
