@@ -141,7 +141,7 @@ coreos:
           --log-flush-frequency=5s \
           --masquerade-all=false \
           --oom-score-adj=-999 \
-          --proxy-mode=userspace \
+          --proxy-mode=iptables \
           --resource-container="/kube-proxy" \
           --udp-timeout=250ms
 
