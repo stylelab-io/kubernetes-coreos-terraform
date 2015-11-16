@@ -95,7 +95,6 @@ write-files:
         ]
       }
 
-hostname: master
 coreos:
   units:
     - name: setup-network-environment.service
@@ -133,6 +132,22 @@ coreos:
 
         RemainAfterExit=yes
         Type=oneshot
+
+    - name: locofo.service
+      command: start
+      content: |
+        [Unit]
+        Description=Locofo adds healthcheck support for http on gce
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStart=/opt/stvnwrgs/locofo-linux64 /etc/locofo/config.json
+
+        Restart=always
+        RestartSec=5
+
     - name: kube-apiserver.service
       command: start
       content: |
@@ -141,6 +156,7 @@ coreos:
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
         Requires=setup-network-environment.service
         After=generate-certs.service
+        
         [Service]
         EnvironmentFile=/etc/network-environment
         ExecStart=/opt/kubernetes/hyperkube apiserver \
@@ -161,20 +177,6 @@ coreos:
         --logtostderr=true
         Restart=always
         RestartSec=10
-    - name: locofo.service
-      command: start
-      content: |
-        [Unit]
-        Description=Locofo adds healthcheck support for http on gce
-        Requires=setup-network-environment.service
-        After=setup-network-environment.service
-        After=kube-apiserver.service
-
-        [Service]
-        ExecStart=/opt/stvnwrgs/locofo-linux64 /etc/locofo/config.json
-
-        Restart=always
-        RestartSec=5
 
     - name: kube-controller-manager.service
       command: start
@@ -210,6 +212,3 @@ coreos:
         --logtostderr=true
         Restart=always
         RestartSec=10
-  update:
-    group: alpha
-    reboot-strategy: off
