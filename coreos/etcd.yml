@@ -59,7 +59,7 @@ write_files:
 coreos:
   etcd2:
     # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: "https://discovery.etcd.io/bef9dbf32060241edd1240b8e08f0949"
+    discovery: "https://discovery.etcd.io/daf38b8db93302f3bffd2a361eb93357"
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: "https://$private_ipv4:2379,https://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"
@@ -84,6 +84,7 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
+
     - name: generate-certs.service
       command: start
       content: |
@@ -101,6 +102,7 @@ coreos:
 
         RemainAfterExit=yes
         Type=oneshot
+        
     - name: locofo.service
       command: start
       content: |
