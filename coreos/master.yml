@@ -175,6 +175,7 @@ coreos:
 
         Restart=always
         RestartSec=5
+        
     - name: kube-controller-manager.service
       command: start
       content: |
@@ -192,6 +193,7 @@ coreos:
         --logtostderr=true
         Restart=always
         RestartSec=10
+
     - name: kube-scheduler.service
       command: start
       content: |
