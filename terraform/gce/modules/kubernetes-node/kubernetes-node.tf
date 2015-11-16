@@ -1,3 +1,15 @@
+resource "template_file" "cloud_config" {
+    filename = "../../coreos/node.yml"
+    vars {
+      cluster_prefix    = "${var.cluster_prefix}"
+      lb_ip             = "${var.lb_ip}"
+      cert_passphrase   = "${var.cert_passphrase}"
+      domain            = "${var.domain}"
+      cloud_provider    = "gce"
+      kube_master_url   = "https://kube-master-lb.${var.domain}"
+    }
+}
+
 resource "google_compute_instance_template" "kube-node" {
     name = "kube-node-template"
     instance_description = "kube-node"
@@ -22,7 +34,7 @@ resource "google_compute_instance_template" "kube-node" {
     }
 
     metadata {
-        user-data = "${file("../../coreos/node.yml")}"
+        user-data = "${template_file.cloud_config.rendered}"
     }
 
     service_account {

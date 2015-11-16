@@ -1,36 +1,65 @@
 #cloud-config
+---
 write-files:
+  - path: /etc/conf.d/nfs
+    permissions: '0644'
+    content: |
+      OPTS_RPC_MOUNTD=""
   - path: /opt/bin/wupiao
     permissions: '0755'
     content: |
       #!/bin/bash
       # [w]ait [u]ntil [p]ort [i]s [a]ctually [o]pen
-      [ -n "$1" ] && [ -n "$2" ] && while ! curl --output /dev/null \
-        --silent --head --fail \
-        http://${1}:${2}; do sleep 1 && echo -n .; done;
+      [ -n "$1" ] && \
+        until curl -o /dev/null -sIf http://${1}; do \
+          sleep 1 && echo .;
+        done;
       exit $?
+
+  - path: /opt/stylelounge/gen.sh
+    owner: root:root
+    permissions: 0755
+    content: |
+      cd /etc/ssl/private && /opt/etcd/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
+      cd /etc/ssl/private && /opt/etcd/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
+      cd /etc/ssl/private && /opt/etcd/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
+      cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
+      chmod 755 /etc/ssl/private
+      cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
+      cd /etc/ssl/private && cp  /etc/ssl/certs/ca.crt
+
+  - path: /etc/kubernetes/auth.csv
+    owner: root:root
+    permissions: 0755
+    content: |
+      admin,admin,pass
+
+  - path: /etc/kubernetes/kube.config
+    owner: root:root
+    permissions: 0755
+    content: |
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - cluster:
+          server: ${kube_master_url}
+        name: kube
+      contexts:
+      - context:
+          cluster: kube
+          user: myself
+        name: default-context
+      current-context: default-context
+      preferences: {}
+      users:
+      - name: admin
+        user:
+          client-certificate: /etc/ssl/private/$private_ipv4.crt
+          client-key: /etc/ssl/private/$private_ipv4.key.insecure
+
+hostname: master
 coreos:
-  etcd2:
-    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    advertise-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    initial-cluster: master=http://10.240.0.4:2380
-    proxy: on
-  fleet:
-    metadata: "role=node"
   units:
-    - name: fleet.service
-      command: start
-    - name: flanneld.service
-      command: start
-      drop-ins:
-        - name: 50-network-config.conf
-          content: |
-            [Unit]
-            Requires=etcd2.service
-            [Service]
-            ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"10.244.0.0/16", "Backend": {"Type": "vxlan"}}'
-    - name: docker.service
-      command: start
     - name: setup-network-environment.service
       command: start
       content: |
@@ -47,50 +76,76 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    - name: kube-proxy.service
+    - name: docker.service
+      command: start
+    - name: generate-certs.service
       command: start
       content: |
         [Unit]
-        Description=Kubernetes Proxy
-        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Description=Create certificates for etcd
         Requires=setup-network-environment.service
         After=setup-network-environment.service
 
         [Service]
-        ExecStartPre=/usr/bin/curl -L -o /opt/bin/kube-proxy -z /opt/bin/kube-proxy https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64/kube-proxy
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kube-proxy
-        # wait for kubernetes master to be up and ready
-        ExecStartPre=/opt/bin/wupiao 10.240.0.4 8080
-        ExecStart=/opt/bin/kube-proxy \
-        --master=10.240.0.4:8080 \
+        ExecStartPre=/bin/mkdir -p /etc/ssl/private/.etcd-ca || yes
+        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
+        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
+        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
+        ExecStart=/usr/bin/bash /opt/stylelounge/gen.sh
+
+        RemainAfterExit=yes
+        Type=oneshot
+    - name: kubelet.service
+      command: start
+      content: |
+        [Service]
+        ExecStart=/opt/kubernetes/hyperkube  kubelet \
+          --api_servers=${kube_master_url}
+          --register-node=true \
+          --allow-privileged=true \
+          --config=/etc/kubernetes/manifests \
+          --hostname-override=$private_ipv4 \
+          --cluster_dns=${DNS_SERVICE_IP} \
+          --cluster_domain=cluster.local \
+          --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+          --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
+          --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem \
+          --cadvisor-port=0
+        Restart=always
+        RestartSec=10
+        [Install]
+        WantedBy=multi-user.target
+    - name: kube-controller-manager.service
+      command: start
+      content: |
+        [Unit]
+        Description=Kubernetes Controller Manager
+        Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
+
+        [Service]
+        ExecStart=/opt/kubernetes/hyperkube controller-manager \
+        --cloud-provider=${cloud_provider} \
+        --master=127.0.0.1:8080 \
+        --kubeconfig=/etc/kubernetes/kube.config \
         --logtostderr=true
         Restart=always
         RestartSec=10
-    - name: kube-kubelet.service
+    - name: kube-scheduler.service
       command: start
       content: |
         [Unit]
-        Description=Kubernetes Kubelet
+        Description=Kubernetes Scheduler
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        Requires=setup-network-environment.service
-        After=setup-network-environment.service
+        Requires=kube-apiserver.service
+        After=kube-apiserver.service
 
         [Service]
-        EnvironmentFile=/etc/network-environment
-        ExecStartPre=/usr/bin/curl -L -o /opt/bin/kubelet -z /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.0.3/bin/linux/amd64/kubelet
-        ExecStartPre=/usr/bin/chmod +x /opt/bin/kubelet
-        # wait for kubernetes master to be up and ready
-        ExecStartPre=/opt/bin/wupiao 10.240.0.4 8080
-        ExecStart=/opt/bin/kubelet \
-        --address=0.0.0.0 \
-        --port=10250 \
-        --hostname-override=${DEFAULT_IPV4} \
-        --api-servers=10.240.0.4:8080 \
-        --allow-privileged=true \
-        --logtostderr=true \
-        --cadvisor-port=4194 \
-        --healthz-bind-address=0.0.0.0 \
-        --healthz-port=10248
+        ExecStart=/opt/kubernetes/hyperkube scheduler \
+        --master=127.0.0.1:8080 \
+        --kubeconfig=/etc/kubernetes/kube.config \
+        --logtostderr=true
         Restart=always
         RestartSec=10
   update:

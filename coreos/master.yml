@@ -114,8 +114,8 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    - name: docker.service
-      command: start
+    # - name: docker.service
+    #   command: start
     - name: generate-certs.service
       command: start
       content: |
