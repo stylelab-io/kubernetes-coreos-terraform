@@ -25,7 +25,7 @@ write-files:
       cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
-      cd /etc/ssl/private && cp  /etc/ssl/certs/ca.crt
+      cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.crt
 
   - path: /etc/kubernetes/etcd-client.json
     owner: root:root
@@ -175,7 +175,7 @@ coreos:
 
         Restart=always
         RestartSec=5
-        
+
     - name: kube-controller-manager.service
       command: start
       content: |

@@ -63,7 +63,7 @@ module "kubernetes-master" {
     cert_passphrase = "${var.cert_passphrase}"
 
     kube_image = "${var.image}"
-    kn_count = "${var.kn_count}"
+    km_count = "${var.km_count}"
 
     #gce vars
     gce_project = "${var.gce_project}"
@@ -88,7 +88,7 @@ module "kubernetes-node" {
     cert_passphrase = "${var.cert_passphrase}"
 
     kube_image = "${var.image}"
-    km_count = "${var.km_count}"
+    kn_count = "${var.kn_count}"
 
     #gce vars
     gce_project = "${var.gce_project}"
