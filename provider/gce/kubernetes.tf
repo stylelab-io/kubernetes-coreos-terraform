@@ -77,7 +77,7 @@ module "kubernetes-master" {
     flannel_network = "${var.flannel_network}"
 
 }
-/*
+
 module "kubernetes-node" {
     source = "modules/kubernetes-node"
 
@@ -101,4 +101,4 @@ module "kubernetes-node" {
     # flannel
     flannel_network = "${var.flannel_network}"
 
-}*/
+}

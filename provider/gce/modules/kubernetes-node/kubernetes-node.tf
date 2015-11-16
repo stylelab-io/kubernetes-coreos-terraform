@@ -11,7 +11,7 @@ resource "template_file" "cloud_config" {
 }
 
 resource "google_compute_instance_template" "kube-node" {
-    name = "kube-node-template"
+    name = "${var.cluster_prefix}kube-node-template"
     instance_description = "kube-node"
     machine_type = "n1-standard-1"
     can_ip_forward = false
@@ -47,9 +47,9 @@ resource "google_compute_target_pool" "kube-node" {
 }
 
 resource "google_compute_autoscaler" "kube-node" {
-    name = "kube-node-autoscaler"
-    zone = "us-central1-f"
-    target = "${google_compute_instance_group_manager.foobar.self_link}"
+    name = "${var.cluster_prefix}kube-node-autoscaler"
+    zone = "${var.gce_zone}"
+    target = "${google_compute_instance_group_manager.kube-node.self_link}"
     autoscaling_policy = {
         max_replicas = 5
         min_replicas = 1
@@ -62,10 +62,10 @@ resource "google_compute_autoscaler" "kube-node" {
 
 resource "google_compute_instance_group_manager" "kube-node" {
     description = "Terraform test instance group manager"
-    name = "kube-node"
+    name = "${var.cluster_prefix}kube-node-manager"
     instance_template = "${google_compute_instance_template.kube-node.self_link}"
     target_pools = ["${google_compute_target_pool.kube-node.self_link}"]
     base_instance_name = "kube-node"
     zone = "europe-west1-b"
-    target_size = 1
+#    target_size = 1
 }
