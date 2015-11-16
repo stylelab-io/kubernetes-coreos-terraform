@@ -26,7 +26,9 @@ write-files:
       cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
-      cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.crt
+      cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.pem
+      update-ca-certificates
+      mkdir /etc/kubernetes/manifests
 
   - path: /etc/kubernetes/auth.csv
     owner: root:root
@@ -108,8 +110,10 @@ coreos:
 
         [Service]
         ExecStart=/opt/kubernetes/hyperkube kubelet \
-          --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+          --kubeconfig=/etc/kubernetes/kube.config \
+          --api-servers=${kube_master_url} \
           --register-node=true \
+          --cloud-provider=${cloud_provider} \
           --allow-privileged=true \
           --config=/etc/kubernetes/manifests \
           --hostname-override=$private_ipv4 \
@@ -132,7 +136,7 @@ coreos:
 
         [Service]
         ExecStart=/opt/kubernetes/hyperkube proxy \
-          --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
+          --kubeconfig=/etc/kubernetes/kube.config \
           --bind-address=0.0.0.0 \
           --healthz-bind-address=0.0.0.0 \
           --healthz-port=10249 \

@@ -53,10 +53,13 @@ write_files:
       cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
+      cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.pem
+      update-ca-certificates
+
 coreos:
   etcd2:
     # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: "https://discovery.etcd.io/f15b24a2430d7f7def72a4d8989166a1"
+    discovery: "https://discovery.etcd.io/bef9dbf32060241edd1240b8e08f0949"
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: "https://$private_ipv4:2379,https://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"
