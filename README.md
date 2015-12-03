@@ -9,6 +9,8 @@ but is also capable to run on Vagrant.
 ## Status ##
 **Work in Progress**
 
+Servers can be spinned up with gce but the kubernetes tools have some configuration problems. 
+
 ## Why not using cluster-up ##
 
   1. Make it more readable
