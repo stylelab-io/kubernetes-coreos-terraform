@@ -66,7 +66,7 @@ resource "google_compute_forwarding_rule" "etcd" {
 }
 
 resource "google_dns_record_set" "etcd" {
-    managed_zone = "snm-tools"
+    managed_zone = "${var.domain_zone_name}"
     name = "etcd-lb.${var.domain}."
     type = "A"
     ttl = 60

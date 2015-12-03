@@ -6,6 +6,7 @@ variable "cluster_prefix" {
 }
 
 variable "domain" {}
+variable "domain_zone_name" {}
 
 # gce variables
 variable "gce_project" {}

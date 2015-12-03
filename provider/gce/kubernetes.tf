@@ -32,6 +32,7 @@ module "etcd" {
     network_name = "${module.network.network_name}"
     cert_passphrase = "${var.cert_passphrase}"
     domain = "${var.domain}"
+    domain_zone_name = "${var.domain_zone_name}"
 
     # etcd vars
     etcd_count = "${var.etcd_count}"
@@ -56,11 +57,12 @@ module "etcd" {
 module "kubernetes-master" {
     source = "modules/kubernetes-master"
 
-    domain = "${var.domain}"
     etcd_address = "${module.etcd.pub_address}"
     lb_ip ="${module.network.km_ip}"
     network_name = "${module.network.network_name}"
     cert_passphrase = "${var.cert_passphrase}"
+    domain = "${var.domain}"
+    domain_zone_name = "${var.domain_zone_name}"
 
     kube_image = "${var.image}"
     km_count = "${var.km_count}"

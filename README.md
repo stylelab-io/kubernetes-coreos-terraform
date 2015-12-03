@@ -30,7 +30,7 @@ but is also capable to run on Vagrant.
 
 ### Infrastructure GCE ###
 
-| Module     | Instance Templates   | Groupmanager | Pool   | Forwarding   | Healtcheck    | Firewall   | Network   |
+| Resource     | Instance Templates   | Groupmanager | Pool   | Forwarding   | Healtcheck    | Firewall   | Network   |
 | ----------:|---------------------:| ------------:| ------:| ------------:| -------------:| ----------:| ---------:|
 | network    | -                    |-             |-       |-             |-              |x           |o          |
 | etcd2      | o                    |o             |o       |o             |o              |o           |o          |
@@ -48,7 +48,6 @@ but is also capable to run on Vagrant.
 ### Kubernetes ###
 
 
-
 ## Setup ##
 
 ### Requirements ###
@@ -57,6 +56,7 @@ but is also capable to run on Vagrant.
   - gcloud in $PATH -
   - terraform local exec provider -
   - image - see build the image
+  - a domain added to cloud-dns from gce
 
 ### Build the image ###
 
@@ -77,7 +77,8 @@ You need at least the following:
 gce_project = "xxxxxx-1234"
 gce_zone = "europe-west1-b"
 gce_account_file = "/path/to/your-account-file.json"
-
+domain = "domain.with.dots.tld"
+domain_zone_name = "zone-name-tld"
 image = "coreos-alpha-815-0-0-kube-1-0-6-xxxxxxxxx" # has to be builded first
 etcd_cert_passphrase = "1234"
 ```

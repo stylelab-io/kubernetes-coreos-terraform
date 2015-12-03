@@ -1,6 +1,7 @@
 # variable "" {}
 
 variable "domain" {}
+variable "domain_zone_name" {}
 
 #etcd
 variable "etcd_count" {}
