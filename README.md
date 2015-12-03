@@ -13,7 +13,7 @@ but is also capable to run on Vagrant.
 
   1. Make it more readable
 
-    - The kubernetes cluster bash + salt files are great, because they work everywhere. But bash is not the best for readability.
+    - The kubernetes cluster bash + salt files are great because they work everywhere but bash is not the best for readability.
 
   2. Make it scalable
 
@@ -25,29 +25,29 @@ but is also capable to run on Vagrant.
 
   4. Make it fast
 
-    - Downloading binaries with cloud-config or a provisioning? No! We want a new Node up in seconds not in Minutes.
+    - Downloading binaries with cloud-config or a provisioning? No! We want a new Node up in seconds!
     - Provision only configuration
 
-### Infrastructure ###
+### Infrastructure GCE ###
 
 | Module     | Instance Templates   | Groupmanager | Pool   | Forwarding   | Healtcheck    | Firewall   | Network   |
 | ----------:|---------------------:| ------------:| ------:| ------------:| -------------:| ----------:| ---------:|
 | network    | -                    |-             |-       |-             |-              |x           |o          |
-| etcd2      | o                    |o             |o       |x             |x              |o           |o          |
-| master     | o                    |o             |x       |x             |x              |x           |o          |
-| node       | x                    |x             |x       |x             |x              |x           |x          |
+| etcd2      | o                    |o             |o       |o             |o              |o           |o          |
+| master     | o                    |o             |o       |o             |o              |o           |o          |
+| node       | o                    |o             |o       |o             |-              |x           |o          |
 
 ### Provisioning ###
 
 | Module     | Authentication | Authorization | Communication A | Communication B |
 | ----------:|---------------:|--------------:|----------------:|----------------:|
-| etcd2      | o                    |o   |o |o |
-| kube-master| x |x|x|x |
-| kube-node| x |x|x|x |
+| etcd2      | o              |o              |o                |o                |
+| kube-master| o              |o              |o                |o                |
+| kube-node  | o              |o              |o                |o                |
 
 ### Kubernetes ###
 
-Nothing finished here
+
 
 ## Setup ##
 
@@ -69,7 +69,7 @@ Terraform uses `variables.tf` files to define the variables a module or the root
 To get an overview of all variables and their defaults see:
 `variables.tf`
 
-To overwrite them create a new file `terraform/gce/terraform.tfvars`
+To overwrite them create a new file `provider/gce/terraform.tfvars`
 
 You need at least the following:
 
@@ -106,6 +106,7 @@ We setup the network with the main firewall rules.
 ### 2. Cert ###
 Because we need a CA cert to generate our certs and key files, we generate one.
 This is done via the `terraform-local-execute` provider  (a plugin) and etcd-ca.
+
 We upload them to GCEs metadata store. So we can later download them from any new instance.
 
 ### 3. etcd ###
@@ -122,3 +123,11 @@ under `./tools/etcd_ca` the script checks the os and switches to the right binar
 
 The ca certificate + key is then stored as metadata to the project. So it can be downloaded in the cloud-init process from coreos.
 After the the system went up, it generates the server / client certs.
+
+### locofo ###
+
+Because health checks wont work with tls i wrote a little proxy. Locofo is installed automatically if you create an image with
+https://github.com/stylelab-io/coreos-kubernetes-packer
+
+You can find the code here:
+https://github.com/stvnwrgs/locofo
