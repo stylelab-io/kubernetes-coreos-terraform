@@ -84,6 +84,8 @@ module "kubernetes-node" {
     source = "modules/kubernetes-node"
 
     domain = "${var.domain}"
+    domain_zone_name = "${var.domain_zone_name}"
+
     #etcd_address = "${module.etcd.pub_address}"
     lb_ip ="${module.network.km_ip}"
     network_name = "${module.network.network_name}"
