@@ -15,19 +15,36 @@ write-files:
           sleep 1 && echo .;
         done;
       exit $?
-  - path: /opt/stylelounge/gen.sh
+  - path: /opt/bin/gen.sh
     owner: root:root
-    permissions: 0755
+    permissions: 0775
     content: |
-      cd /etc/ssl/private && /opt/etcd/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
+      cd /etc/ssl/private && /opt/bin/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
+      cd /etc/ssl/private && /opt/bin/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
+      cd /etc/ssl/private && /opt/bin/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
       cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
       cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.pem
       update-ca-certificates
 
+  - path: /etc/systemd/system/docker.service.d/40-flannel.conf
+    owner: root:root
+    permissions: 0755
+    content: |
+      [Unit]
+      Requires=flanneld.service
+      After=flanneld.service
+
+  - path: /etc/systemd/system/flanneld.service.d/40-ExecStartPre-symlink.conf
+    owner: root:root
+    permissions: 0755
+    content: |
+      FLANNELD_IFACE=$public_ipv4
+      FLANNELD_ETCD_ENDPOINTS=${etcd_address}
+      FLANNELD_ETCD-KEYFILE="/etc/ssl/private/$private_ipv4.key.insecure"
+      FLANNELD_ETCD-CERTFILE="/etc/ssl/private/$private_ipv4.crt"
+      FLANNELD_ETCD-CAFILE="/etc/ssl/private/ca.crt"
 
   - path: /etc/kubernetes/etcd-client.json
     owner: root:root
@@ -115,8 +132,10 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
-    # - name: docker.service
-    #   command: start
+    - name: flanneld.service
+      command: start
+    - name: docker.service
+      command: start
     - name: generate-certs.service
       command: start
       content: |
@@ -127,13 +146,17 @@ coreos:
 
         [Service]
         ExecStartPre=/bin/mkdir -p /etc/ssl/private/.etcd-ca || yes
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
-        ExecStart=/usr/bin/bash /opt/stylelounge/gen.sh
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
+        ExecStart=/usr/bin/bash /opt/bin/gen.sh
 
         RemainAfterExit=yes
         Type=oneshot
+
+    - name: flannel-dropin
+      content: |
+        ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
 
     - name: locofo.service
       command: start
@@ -145,7 +168,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStart=/opt/stvnwrgs/locofo-linux64 /etc/locofo/config.json
+        ExecStart=/opt/bin/locofo-linux64 /etc/locofo/config.json
 
         Restart=always
         RestartSec=5
@@ -161,19 +184,20 @@ coreos:
 
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStart=/opt/kubernetes/hyperkube apiserver \
-        --cloud-provider=${cloud_provider} \
-        --basic-auth-file=/etc/kubernetes/auth.csv \
+        ExecStart=/opt/bin/hyperkube apiserver \
         --admission-control=NamespaceLifecycle,NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
-        --runtime-config=api/v1 \
         --allow-privileged=true \
+        --basic-auth-file=/etc/kubernetes/auth.csv \
+        --client-ca-file=/etc/ssl/private/ca.crt \
+        --cloud-provider=${cloud_provider} \
+        --cors_allowed_origins=.* \
+        --etcd-config=/etc/kubernetes/etcd-client.json \
         --insecure-bind-address=0.0.0.0 \
         --insecure-port=8080 \
         --kubelet-https=true \
+        --runtime-config=api/v1 \
         --secure-port=443 \
         --service-cluster-ip-range=10.40.0.0/16 \
-        --etcd-config=/etc/kubernetes/etcd-client.json \
-        --client-ca-file=/etc/ssl/private/ca.crt \
         --tls-cert-file=/etc/ssl/private/$private_ipv4.crt \
         --tls-private-key-file=/etc/ssl/private/$private_ipv4.key.insecure \
         --logtostderr=true
@@ -190,11 +214,12 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStart=/opt/kubernetes/hyperkube controller-manager \
+        ExecStart=/opt/bin/hyperkube controller-manager \
         --cloud-provider=${cloud_provider} \
-        --master=127.0.0.1:8080 \
         --kubeconfig=/etc/kubernetes/kube.config \
-        --logtostderr=true
+        --logtostderr=true \
+        --master=127.0.0.1:8080 \
+        --root-ca-file="/etc/ssl/private/ca.crt"
         Restart=always
         RestartSec=10
 
@@ -208,9 +233,9 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStart=/opt/kubernetes/hyperkube scheduler \
-        --master=127.0.0.1:8080 \
+        ExecStart=/opt/bin/hyperkube scheduler \
         --kubeconfig=/etc/kubernetes/kube.config \
-        --logtostderr=true
+        --logtostderr=true \
+        --master=127.0.0.1:8080
         Restart=always
         RestartSec=10

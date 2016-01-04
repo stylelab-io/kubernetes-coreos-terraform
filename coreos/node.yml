@@ -16,13 +16,13 @@ write-files:
         done;
       exit $?
 
-  - path: /opt/stylelounge/gen.sh
+  - path: /opt/bin/gen.sh
     owner: root:root
     permissions: 0755
     content: |
-      cd /etc/ssl/private && /opt/etcd/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
+      cd /etc/ssl/private && /opt/bin/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
+      cd /etc/ssl/private && /opt/bin/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
+      cd /etc/ssl/private && /opt/bin/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
       cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
@@ -35,6 +35,24 @@ write-files:
     permissions: 0755
     content: |
       admin,admin,pass
+
+  - path: /etc/systemd/system/docker.service.d/40-flannel.conf
+    owner: root:root
+    permissions: 0755
+    content: |
+      [Unit]
+      Requires=flanneld.service
+      After=flanneld.service
+
+  - path: /etc/flannel/options.env
+    owner: root:root
+    permissions: 0755
+    content: |
+      FLANNELD_IFACE=$public_ipv4
+      FLANNELD_ETCD_ENDPOINTS=${etcd_address}
+      FLANNELD_ETCD_KEYFILE="/etc/ssl/private/$private_ipv4.key.insecure"
+      FLANNELD_ETCD_CERTFILE="/etc/ssl/private/$private_ipv4.crt"
+      FLANNELD_ETCD_CAFILE="/etc/ssl/private/ca.crt"
 
   - path: /etc/kubernetes/kube.config
     owner: root:root
@@ -77,6 +95,14 @@ coreos:
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
         Type=oneshot
+
+    - name: flanneld.service
+      drop-ins:
+        - name: 40-ExecStartPre-symlink.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
+      command: start
     - name: docker.service
       command: start
     - name: generate-certs.service
@@ -89,10 +115,10 @@ coreos:
 
         [Service]
         ExecStartPre=/bin/mkdir -p /etc/ssl/private/.etcd-ca || yes
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
-        ExecStart=/usr/bin/bash /opt/stylelounge/gen.sh
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
+        ExecStart=/usr/bin/bash /opt/bin/gen.sh
 
         RemainAfterExit=yes
         Type=oneshot
@@ -109,20 +135,23 @@ coreos:
         After=generate-certs.service
 
         [Service]
-        ExecStart=/opt/kubernetes/hyperkube kubelet \
-          --kubeconfig=/etc/kubernetes/kube.config \
-          --api-servers=${kube_master_url} \
-          --register-node=true \
-          --cloud-provider=${cloud_provider} \
+        ExecStart=/opt/bin/hyperkube kubelet \
           --allow-privileged=true \
+          --api-servers=${kube_master_url} \
+          --cadvisor-port=4194 \
+          --cloud-provider=${cloud_provider} \
           --config=/etc/kubernetes/manifests \
+          --enable-debugging-handlers=true \
           --hostname-override=$private_ipv4 \
-          --cadvisor-port=0
+          --kubeconfig=/etc/kubernetes/kube.config \
+          --logtostderr=true \
+          --pod-cidr=10.40.0.0/16 \
+          --register-node=true \
+          --v=2
 
         Restart=always
         RestartSec=10
 
-#           --google-json-key=""
     - name: kube-proxy.service
       command: start
       content: |
@@ -133,17 +162,12 @@ coreos:
         After=kube-proxy.service
 
         [Service]
-        ExecStart=/opt/kubernetes/hyperkube proxy \
-          --kubeconfig=/etc/kubernetes/kube.config \
+        ExecStart=/opt/bin/hyperkube proxy \
           --bind-address=0.0.0.0 \
           --healthz-bind-address=0.0.0.0 \
           --healthz-port=10249 \
-          --log-flush-frequency=5s \
-          --masquerade-all=false \
-          --oom-score-adj=-999 \
-          --proxy-mode=iptables \
-          --resource-container="/kube-proxy" \
-          --udp-timeout=250ms
+          --kubeconfig=/etc/kubernetes/kube.config \
+          --proxy-mode=iptables
 
         Restart=always
         RestartSec=10

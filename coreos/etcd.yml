@@ -43,13 +43,13 @@ write_files:
         ]
       }
 
-  - path: /opt/stylelounge/gen.sh
+  - path: /opt/bin/gen.sh
     owner: root:root
     permissions: 0755
     content: |
-      cd /etc/ssl/private && /opt/etcd/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
-      cd /etc/ssl/private && /opt/etcd/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
+      cd /etc/ssl/private && /opt/bin/etcd-ca new-cert --passphrase="${cert_passphrase}" --ip="127.0.0.1,$private_ipv4,$public_ipv4,${lb_ip}" --domain="*.${domain}" $private_ipv4
+      cd /etc/ssl/private && /opt/bin/etcd-ca sign --passphrase="${cert_passphrase}" $private_ipv4
+      cd /etc/ssl/private && /opt/bin/etcd-ca export --passphrase="${cert_passphrase}" --insecure $private_ipv4 > $private_ipv4.tar
       cd /etc/ssl/private && tar -xvf /etc/ssl/private/$private_ipv4.tar
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
@@ -59,7 +59,7 @@ write_files:
 coreos:
   etcd2:
     # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: "https://discovery.etcd.io/b0d65f76764648d0f28dba7c70399e08"
+    discovery: "https://discovery.etcd.io/629925fc69a56ac41f96021f108ad55a"
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: "https://$private_ipv4:2379,https://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"
@@ -95,10 +95,10 @@ coreos:
 
         [Service]
         ExecStartPre=/bin/mkdir -p /etc/ssl/private/.etcd-ca || yes
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
-        ExecStartPre=/opt/stylelounge/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
-        ExecStart=/usr/bin/bash /opt/stylelounge/gen.sh
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-crt-etcd /etc/ssl/private/.etcd-ca/ca.crt
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-key-etcd /etc/ssl/private/.etcd-ca/ca.key
+        ExecStartPre=/opt/bin/metadata-downloader ${cluster_prefix}ca-info-etcd /etc/ssl/private/.etcd-ca/ca.crt.info
+        ExecStart=/usr/bin/bash /opt/bin/gen.sh
 
         RemainAfterExit=yes
         Type=oneshot
@@ -112,7 +112,7 @@ coreos:
         After=setup-network-environment.service
 
         [Service]
-        ExecStart=/opt/stvnwrgs/locofo-linux64 /etc/locofo/config.json
+        ExecStart=/opt/bin/locofo-linux64 /etc/locofo/config.json
 
         Restart=always
         RestartSec=5
