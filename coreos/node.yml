@@ -117,8 +117,8 @@ coreos:
           -etcd-endpoints https://etcd-lb.${domain}:2379 \
           -iface $private_ipv4
 
-        RemainAfterExit=yes
-        Type=oneshot
+        Restart=always
+        RestartSec=10
 
     - name: docker.service
       command: start
