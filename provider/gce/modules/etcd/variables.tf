@@ -22,6 +22,7 @@ variable "gce_region" {}
 variable "gce_account_file" {}
 variable "cluster_prefix" {}
 variable "gce_network_range" {}
+variable "gce_pod_network_range" {}
 
 # flannel
 variable "flannel_network" {}

@@ -52,6 +52,7 @@ module "etcd" {
     cluster_prefix = "${var.cluster_prefix}"
     gce_account_file = "${var.gce_account_file}"
     gce_network_range = "${var.gce_service_network_range}"
+    gce_pod_network_range = "${var.gce_pod_network_range}"
 
     # flannel
     flannel_network = "${var.flannel_network}"

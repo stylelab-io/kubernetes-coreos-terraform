@@ -81,6 +81,7 @@ resource "template_file" "cloud_config" {
         lb_ip               = "${var.lb_ip}"
         cert_passphrase     = "${var.cert_passphrase}"
         domain              = "${var.domain}"
+        pod_network         = "${var.domain}"
     }
 
     depends_on = [

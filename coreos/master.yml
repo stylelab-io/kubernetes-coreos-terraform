@@ -194,7 +194,7 @@ coreos:
         [Service]
         EnvironmentFile=/etc/network-environment
         ExecStart=/opt/bin/kube-apiserver \
-        --admission-control=NamespaceLifecycle,NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
+        --admission-control=NamespaceLifecycle,NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ResourceQuota \
         --allow-privileged=true \
         --basic-auth-file=/etc/kubernetes/auth.csv \
         --client-ca-file=/etc/ssl/private/ca.crt \
