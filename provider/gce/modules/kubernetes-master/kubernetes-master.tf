@@ -72,8 +72,6 @@ resource "template_file" "cloud_config" {
     }
 }
 
-
-
 resource "google_compute_instance_template" "kube-master" {
     name = "${var.cluster_prefix}kube-master-template"
     description = "Kube Master instance template"
@@ -103,7 +101,7 @@ resource "google_compute_instance_template" "kube-master" {
     }
 
     service_account {
-        scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+        scopes = ["userinfo-email", "compute-rw", "storage-ro"]
     }
     depends_on = [
         "template_file.cloud_config",

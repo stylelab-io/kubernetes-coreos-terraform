@@ -38,24 +38,6 @@ write-files:
     content: |
       admin,admin,pass
 
-  - path: /etc/systemd/system/docker.service.d/40-flannel.conf
-    owner: root:root
-    permissions: 0755
-    content: |
-      [Unit]
-      Requires=flanneld.service
-      After=flanneld.service
-
-  - path: /etc/flannel/options.env
-    owner: root:root
-    permissions: 0755
-    content: |
-      FLANNELD_IFACE=$private_ip4
-      FLANNELD_ETCD_ENDPOINTS="https://etcd-lb.${domain}:2379"
-      FLANNELD_ETCD_KEYFILE="/etc/ssl/etcd/$private_ipv4.key.insecure"
-      FLANNELD_ETCD_CERTFILE="/etc/ssl/etcd/$private_ipv4.crt"
-      FLANNELD_ETCD_CAFILE="/etc/ssl/etcd/ca.crt"
-
   - path: /etc/kubernetes/kube.config
     owner: root:root
     permissions: 0755
@@ -98,15 +80,8 @@ coreos:
         RemainAfterExit=yes
         Type=oneshot
 
-    - name: flanneld.service
-      drop-ins:
-        - name: 40-ExecStartPre-symlink.conf
-          content: |
-            [Service]
-            ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
-    - name: docker.service
-      command: start
+
     - name: generate-certs.service
       command: start
       content: |
@@ -124,6 +99,35 @@ coreos:
 
         RemainAfterExit=yes
         Type=oneshot
+
+    - name: flannel.service
+      command: start
+      content: |
+        [Unit]
+        Description=Create certificates for etcd
+        Requires=setup-network-environment.service
+        After=setup-network-environment.service
+        After=generate-certs.service
+
+        [Service]
+        ExecStart=/opt/bin/flanneld \
+          -etcd-cafile /etc/ssl/private/ca.crt \
+          -etcd-certfile /etc/ssl/private/$private_ipv4.crt \
+          -etcd-keyfile /etc/ssl/private/$private_ipv4.key.insecure \
+          -etcd-endpoints https://etcd-lb.${domain}:2379 \
+          -iface $private_ipv4
+
+        RemainAfterExit=yes
+        Type=oneshot
+
+    - name: docker.service
+      command: start
+      drop-ins:
+        - name: 40-flannel.conf
+          content: |
+            [Unit]
+            Requires=flannel.service
+            After=flannel.service
 
 #--cluster_dns={DNS_SERVICE_IP} \
 #           --cluster_domain=cluster.local \
@@ -161,8 +165,8 @@ coreos:
         [Unit]
         Description=Kubernetes Proxy
         Documentation=https://github.com/GoogleCloudPlatform/kubernetes
-        Requires=kube-proxy.service
-        After=kube-proxy.service
+        Requires=flannel.service
+        After=flannel.service
 
         [Service]
         ExecStart=/opt/bin/kube-proxy \

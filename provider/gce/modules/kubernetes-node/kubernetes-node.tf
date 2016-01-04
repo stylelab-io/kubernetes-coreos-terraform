@@ -39,7 +39,7 @@ resource "google_compute_instance_template" "kube-node" {
     }
 
     service_account {
-        scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+        scopes = ["userinfo-email", "compute-rw", "storage-ro"]
     }
 }
 
