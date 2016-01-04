@@ -27,26 +27,20 @@ write-files:
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
       cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.pem
+      mkdir /etc/ssl/etcd
+      cp -R /etc/ssl/private/* /etc/ssl/etcd
       update-ca-certificates
-
-  - path: /etc/systemd/system/docker.service.d/40-flannel.conf
-    owner: root:root
-    permissions: 0755
-    content: |
-      [Unit]
-      Requires=flanneld.service
-      After=flanneld.service
 
   - path: /etc/flannel/options.env
     owner: root:root
     permissions: 0755
     content: |
       FLANNELD_IFACE=$private_ip4
-      FLANNELD_ETCD_ENDPOINTS=${etcd_address}
-      FLANNELD_ETCD-KEYFILE="/etc/ssl/private/$private_ipv4.key.insecure"
-      FLANNELD_ETCD-CERTFILE="/etc/ssl/private/$private_ipv4.crt"
-      FLANNELD_ETCD-CAFILE="/etc/ssl/private/ca.crt"
-
+      FLANNELD_ETCD_ENDPOINTS="https://etcd-lb.${domain}:2379"
+      FLANNELD_ETCD_KEYFILE="/etc/ssl/etcd/$private_ipv4.key.insecure"
+      FLANNELD_ETCD_CERTFILE="/etc/ssl/etcd/$private_ipv4.crt"
+      FLANNELD_ETCD_CAFILE="/etc/ssl/etcd/ca.crt"
+      
   - path: /etc/kubernetes/etcd-client.json
     owner: root:root
     permissions: 0755
@@ -186,7 +180,7 @@ coreos:
 
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStart=/opt/bin/apiserver \
+        ExecStart=/opt/bin/kube-apiserver \
         --admission-control=NamespaceLifecycle,NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
         --allow-privileged=true \
         --basic-auth-file=/etc/kubernetes/auth.csv \
@@ -217,7 +211,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStart=/opt/bin/controller-manager \
+        ExecStart=/opt/bin/kube-controller-manager \
         --cloud-provider=${cloud_provider} \
         --kubeconfig=/etc/kubernetes/kube.config \
         --logtostderr=true \
@@ -237,7 +231,7 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStart=/opt/bin/scheduler \
+        ExecStart=/opt/bin/kube-scheduler \
         --kubeconfig=/etc/kubernetes/kube.config \
         --logtostderr=true \
         --master=127.0.0.1:8080 \

@@ -27,6 +27,8 @@ write-files:
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
       cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.pem
+      mkdir /etc/ssl/etcd
+      cp -R /etc/ssl/private/* /etc/ssl/etcd
       update-ca-certificates
       mkdir /etc/kubernetes/manifests
 
@@ -49,10 +51,10 @@ write-files:
     permissions: 0755
     content: |
       FLANNELD_IFACE=$private_ip4
-      FLANNELD_ETCD_ENDPOINTS=${etcd_address}
-      FLANNELD_ETCD_KEYFILE="/etc/ssl/private/$private_ipv4.key.insecure"
-      FLANNELD_ETCD_CERTFILE="/etc/ssl/private/$private_ipv4.crt"
-      FLANNELD_ETCD_CAFILE="/etc/ssl/private/ca.crt"
+      FLANNELD_ETCD_ENDPOINTS="https://etcd-lb.${domain}:2379"
+      FLANNELD_ETCD_KEYFILE="/etc/ssl/etcd/$private_ipv4.key.insecure"
+      FLANNELD_ETCD_CERTFILE="/etc/ssl/etcd/$private_ipv4.crt"
+      FLANNELD_ETCD_CAFILE="/etc/ssl/etcd/ca.crt"
 
   - path: /etc/kubernetes/kube.config
     owner: root:root
@@ -163,7 +165,7 @@ coreos:
         After=kube-proxy.service
 
         [Service]
-        ExecStart=/opt/bin/proxy \
+        ExecStart=/opt/bin/kube-proxy \
           --bind-address=0.0.0.0 \
           --healthz-bind-address=0.0.0.0 \
           --healthz-port=10249 \
