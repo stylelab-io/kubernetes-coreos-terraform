@@ -25,7 +25,7 @@ resource "google_compute_http_health_check" "etcd" {
 
 resource "google_compute_firewall" "allow-etcd-external" {
     name = "${var.cluster_prefix}allow-etcd-external"
-    network = "${var.network_name}"
+    network = "${var.service_network_name}"
 
     allow {
         protocol = "tcp"
@@ -37,7 +37,7 @@ resource "google_compute_firewall" "allow-etcd-external" {
 
 resource "google_compute_firewall" "allow-etcd-internal" {
     name = "${var.cluster_prefix}allow-etcd-internal"
-    network = "${var.network_name}"
+    network = "${var.service_network_name}"
 
     allow {
         protocol = "tcp"
@@ -105,7 +105,7 @@ resource "google_compute_instance_template" "etcd" {
     }
 
     network_interface {
-        network = "${var.network_name.self_link}"
+        network = "${var.service_network_name}"
         access_config {
             // Ephemeral IP
         }

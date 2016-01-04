@@ -11,7 +11,7 @@ variable "etcd_data_disk_size" {}
 variable "etcd_image_disk_size" {}
 
 # vars from modules
-variable "network_name" {}
+variable "service_network_name" {}
 variable "lb_ip" {}
 variable "cert_passphrase" {}
 

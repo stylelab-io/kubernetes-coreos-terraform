@@ -20,12 +20,19 @@ variable "gce_region" {
 }
 
 # network
-variable "gce_network_name" {
-    default = "default"
+variable "gce_service_network_name" {
+    default = "kube-service"
 }
 
-variable "gce_network_range" {
-    default ="10.240.0.0/16"
+variable "gce_service_network_range" {
+    default ="10.220.0.0/16"
+}
+variable "gce_pod_network_name" {
+    default = "kube-pod"
+}
+
+variable "gce_pod_network_range" {
+    default ="10.230.0.0/16"
 }
 
 # certs
@@ -39,7 +46,7 @@ variable "cert_path" {
 
 # flannel
 variable "flannel_network" {
-    default = "10.40.0.0/16"
+    default = "10.230.0.0/16"
 }
 
 # etcd

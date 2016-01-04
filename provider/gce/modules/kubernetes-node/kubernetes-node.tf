@@ -28,7 +28,7 @@ resource "google_compute_instance_template" "kube-node" {
     }
 
     network_interface {
-        network = "default"
+        network = "${var.service_network_name}"
         access_config {
 
         }

@@ -6,7 +6,7 @@ variable "cert_passphrase" {}
 
 variable "etcd_address" {}
 variable "lb_ip" {}
-variable "network_name" {}
+variable "service_network_name" {}
 variable "kube_image" {}
 
 variable "km_count" {}
@@ -17,6 +17,7 @@ variable "gce_region" {}
 variable "gce_zone" {}
 variable "cluster_prefix" {}
 variable "gce_account_file" {}
+#removeable?
 variable "gce_network_range" {}
 
   # flannel

@@ -15,6 +15,7 @@ write-files:
           sleep 1 && echo .;
         done;
       exit $?
+
   - path: /opt/bin/gen.sh
     owner: root:root
     permissions: 0775
@@ -36,11 +37,11 @@ write-files:
       Requires=flanneld.service
       After=flanneld.service
 
-  - path: /etc/systemd/system/flanneld.service.d/40-ExecStartPre-symlink.conf
+  - path: /etc/flannel/options.env
     owner: root:root
     permissions: 0755
     content: |
-      FLANNELD_IFACE=$public_ipv4
+      FLANNELD_IFACE=$private_ip4
       FLANNELD_ETCD_ENDPOINTS=${etcd_address}
       FLANNELD_ETCD-KEYFILE="/etc/ssl/private/$private_ipv4.key.insecure"
       FLANNELD_ETCD-CERTFILE="/etc/ssl/private/$private_ipv4.crt"
@@ -84,7 +85,7 @@ write-files:
       contexts:
       - context:
           cluster: kube
-          user: myself
+          user: admin
         name: default-context
       current-context: default-context
       preferences: {}
@@ -133,6 +134,11 @@ coreos:
         RemainAfterExit=yes
         Type=oneshot
     - name: flanneld.service
+      drop-ins:
+        - name: 40-ExecStartPre-symlink.conf
+          content: |
+            [Service]
+            ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
       command: start
     - name: docker.service
       command: start
@@ -153,10 +159,6 @@ coreos:
 
         RemainAfterExit=yes
         Type=oneshot
-
-    - name: flannel-dropin
-      content: |
-        ExecStartPre=/usr/bin/ln -sf /etc/flannel/options.env /run/flannel/options.env
 
     - name: locofo.service
       command: start
@@ -184,7 +186,7 @@ coreos:
 
         [Service]
         EnvironmentFile=/etc/network-environment
-        ExecStart=/opt/bin/hyperkube apiserver \
+        ExecStart=/opt/bin/apiserver \
         --admission-control=NamespaceLifecycle,NamespaceAutoProvision,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota \
         --allow-privileged=true \
         --basic-auth-file=/etc/kubernetes/auth.csv \
@@ -197,10 +199,11 @@ coreos:
         --kubelet-https=true \
         --runtime-config=api/v1 \
         --secure-port=443 \
-        --service-cluster-ip-range=10.40.0.0/16 \
+        --service-cluster-ip-range=10.220.0.0/16 \
         --tls-cert-file=/etc/ssl/private/$private_ipv4.crt \
         --tls-private-key-file=/etc/ssl/private/$private_ipv4.key.insecure \
-        --logtostderr=true
+        --logtostderr=true \
+        --v=3
         Restart=always
         RestartSec=10
 
@@ -214,12 +217,13 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStart=/opt/bin/hyperkube controller-manager \
+        ExecStart=/opt/bin/controller-manager \
         --cloud-provider=${cloud_provider} \
         --kubeconfig=/etc/kubernetes/kube.config \
         --logtostderr=true \
         --master=127.0.0.1:8080 \
-        --root-ca-file="/etc/ssl/private/ca.crt"
+        --root-ca-file="/etc/ssl/private/ca.crt" \
+        --v=3
         Restart=always
         RestartSec=10
 
@@ -233,9 +237,10 @@ coreos:
         After=kube-apiserver.service
 
         [Service]
-        ExecStart=/opt/bin/hyperkube scheduler \
+        ExecStart=/opt/bin/scheduler \
         --kubeconfig=/etc/kubernetes/kube.config \
         --logtostderr=true \
-        --master=127.0.0.1:8080
+        --master=127.0.0.1:8080 \
+        --v=3
         Restart=always
         RestartSec=10

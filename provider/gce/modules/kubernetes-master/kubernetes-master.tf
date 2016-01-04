@@ -38,7 +38,7 @@ resource "google_dns_record_set" "kube-master" {
 
 resource "google_compute_firewall" "kube-internal" {
     name = "${var.cluster_prefix}allow-kube-master-internal"
-    network = "${var.network_name}"
+    network = "${var.service_network_name}"
 
     allow {
         protocol = "tcp"
@@ -50,7 +50,7 @@ resource "google_compute_firewall" "kube-internal" {
 
 resource "google_compute_firewall" "kube-external" {
     name = "${var.cluster_prefix}allow-kube-master-external"
-    network = "${var.network_name}"
+    network = "${var.service_network_name}"
 
     allow {
         protocol = "tcp"
@@ -92,7 +92,7 @@ resource "google_compute_instance_template" "kube-master" {
     }
 
     network_interface {
-        network = "${var.network_name}"
+        network = "${var.service_network_name}"
         access_config {
             //Ephemeral
         }

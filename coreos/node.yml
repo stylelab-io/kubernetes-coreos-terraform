@@ -48,7 +48,7 @@ write-files:
     owner: root:root
     permissions: 0755
     content: |
-      FLANNELD_IFACE=$public_ipv4
+      FLANNELD_IFACE=$private_ip4
       FLANNELD_ETCD_ENDPOINTS=${etcd_address}
       FLANNELD_ETCD_KEYFILE="/etc/ssl/private/$private_ipv4.key.insecure"
       FLANNELD_ETCD_CERTFILE="/etc/ssl/private/$private_ipv4.crt"
@@ -67,7 +67,7 @@ write-files:
       contexts:
       - context:
           cluster: kube
-          user: myself
+          user: admin
         name: default-context
       current-context: default-context
       preferences: {}
@@ -135,19 +135,20 @@ coreos:
         After=generate-certs.service
 
         [Service]
-        ExecStart=/opt/bin/hyperkube kubelet \
+        ExecStart=/opt/bin/kubelet \
           --allow-privileged=true \
           --api-servers=${kube_master_url} \
-          --cadvisor-port=4194 \
+          --cadvisor-port=0 \
           --cloud-provider=${cloud_provider} \
+          --cluster_domain=cluster.local \
           --config=/etc/kubernetes/manifests \
           --enable-debugging-handlers=true \
           --hostname-override=$private_ipv4 \
           --kubeconfig=/etc/kubernetes/kube.config \
           --logtostderr=true \
-          --pod-cidr=10.40.0.0/16 \
+          --pod-cidr=10.230.0.0/16 \
           --register-node=true \
-          --v=2
+          --v=4
 
         Restart=always
         RestartSec=10
@@ -162,12 +163,12 @@ coreos:
         After=kube-proxy.service
 
         [Service]
-        ExecStart=/opt/bin/hyperkube proxy \
+        ExecStart=/opt/bin/proxy \
           --bind-address=0.0.0.0 \
           --healthz-bind-address=0.0.0.0 \
           --healthz-port=10249 \
           --kubeconfig=/etc/kubernetes/kube.config \
-          --proxy-mode=iptables
+          --v=3
 
         Restart=always
         RestartSec=10
