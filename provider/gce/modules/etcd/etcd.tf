@@ -1,5 +1,5 @@
 output "pub_address" {
-    value = "${format("http://%s:%s", google_compute_forwarding_rule.etcd.ip_address, "2379")}"
+    value = "${format("https://%s:%s", google_compute_forwarding_rule.etcd.ip_address, "2379")}"
 }
 
 # one-liner to generate a new discovery token url

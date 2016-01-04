@@ -7,6 +7,7 @@ resource "template_file" "cloud_config" {
       domain            = "${var.domain}"
       cloud_provider    = "gce"
       kube_master_url   = "https://kube-master-lb.${var.domain}"
+      etcd_address           = "${var.etcd_address}"
     }
 }
 

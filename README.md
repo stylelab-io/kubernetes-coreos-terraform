@@ -9,7 +9,7 @@ but is also capable to run on Vagrant.
 ## Status ##
 **Work in Progress**
 
-Servers can be spinned up with gce but the kubernetes tools have some configuration problems. 
+Servers can be spinned up with gce but the kubernetes tools have some configuration problems.
 
 ## Why not using cluster-up ##
 
@@ -56,6 +56,8 @@ Servers can be spinned up with gce but the kubernetes tools have some configurat
   - terraform  -
   - packer -
   - gcloud in $PATH -
+  - gcloud config setup correctly
+  - gcloud auth login 
   - terraform local exec provider -
   - image - see build the image
   - a domain added to cloud-dns from gce

@@ -22,6 +22,8 @@ module "cert" {
     cert_path = "${var.cert_path}"
     cert_passphrase = "${var.cert_passphrase}"
     cluster_prefix = "${var.cluster_prefix}"
+    gce_project = "${var.gce_project}"
+    gce_account_file = "${var.gce_account_file}"
 }
 
 module "etcd" {
@@ -86,7 +88,7 @@ module "kubernetes-node" {
     domain = "${var.domain}"
     domain_zone_name = "${var.domain_zone_name}"
 
-    #etcd_address = "${module.etcd.pub_address}"
+    etcd_address = "${module.etcd.pub_address}"
     lb_ip ="${module.network.km_ip}"
     network_name = "${module.network.network_name}"
     cert_passphrase = "${var.cert_passphrase}"

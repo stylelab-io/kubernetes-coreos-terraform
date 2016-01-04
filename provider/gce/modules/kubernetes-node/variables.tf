@@ -4,7 +4,7 @@ variable "domain" {}
 variable "domain_zone_name" {}
 variable "cert_passphrase" {}
 
-#variable "etcd_address" {}
+variable "etcd_address" {}
 variable "lb_ip" {}
 variable "network_name" {}
 variable "kube_image" {}
