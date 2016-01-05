@@ -59,7 +59,7 @@ write_files:
 coreos:
   etcd2:
     # generate a new token for each unique cluster from https://discovery.etcd.io/new?size=3
-    discovery: "https://discovery.etcd.io/b8b5aa3240cb6c246541097c7d447917"
+    discovery: "https://discovery.etcd.io/0653d02964720d88a6af24caad59ac47"
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: "https://$private_ipv4:2379,https://$public_ipv4:2379"
     initial-advertise-peer-urls: "http://$private_ipv4:2380"
@@ -127,7 +127,12 @@ coreos:
         After=etcd2.service
 
         [Service]
-        ExecStart=etcdctl --endpoint https://$private_ipv4:2379  --cert-file /etc/ssl/private/$private_ipv4.crt  --ca-file /etc/ssl/private/ca.crt --key-file /etc/ssl/private/$private_ipv4.key.insecure  set /coreos.com/network/config '{"Network":"${pod_network}", "Backend": {"Type": "gce"}}'
+        ExecStart=/usr/bin/etcdctl \
+        --endpoint https://$private_ipv4:2379  \
+        --cert-file /etc/ssl/private/$private_ipv4.crt  \
+        --ca-file /etc/ssl/private/ca.crt \
+        --key-file /etc/ssl/private/$private_ipv4.key.insecure \
+        set /coreos.com/network/config '{"Network":"${pod_network}", "Backend": {"Type": "gce"}}'
 
         RemainAfterExit=yes
         Type=oneshot

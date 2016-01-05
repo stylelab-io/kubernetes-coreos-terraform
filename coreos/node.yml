@@ -149,7 +149,6 @@ coreos:
           --cluster_domain=cluster.local \
           --config=/etc/kubernetes/manifests \
           --enable-debugging-handlers=true \
-          --hostname-override=$private_ipv4 \
           --kubeconfig=/etc/kubernetes/kube.config \
           --logtostderr=true \
           --pod-cidr=10.230.0.0/16 \
