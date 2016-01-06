@@ -98,6 +98,7 @@ module "kubernetes-node" {
 
     kube_image = "${var.image}"
     kn_count = "${var.kn_count}"
+    kn_machine_type = "${var.kn_machine_type}"
 
     #gce vars
     gce_project = "${var.gce_project}"

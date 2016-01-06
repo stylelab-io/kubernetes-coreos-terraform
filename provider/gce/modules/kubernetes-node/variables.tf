@@ -10,6 +10,7 @@ variable "service_network_name" {}
 variable "kube_image" {}
 
 variable "kn_count" {}
+variable "kn_machine_type" {}
 
   #gce vars
 variable "gce_project" {}
