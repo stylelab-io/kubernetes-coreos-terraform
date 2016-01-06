@@ -15,7 +15,7 @@ resource "google_compute_instance_template" "kube-node" {
     name = "${var.cluster_prefix}kube-node-template"
     instance_description = "kube-node"
     machine_type = "n1-standard-1"
-    can_ip_forward = false
+    can_ip_forward = true
     automatic_restart = true
     on_host_maintenance = "MIGRATE"
     tags = ["kube-node"]
