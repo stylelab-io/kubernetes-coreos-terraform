@@ -13,41 +13,46 @@ Servers can be spinned up with gce but the kubernetes tools have some configurat
 
 ## Why not using cluster-up ##
 
-  1. Make it more readable
+  1. More readable than bash
+  2. Every part of a Kubernetes Cluster should be easy to scale (Nodes should autoscale!)
+  3. Fault tolerant with network loadbalancer + healtchecks
+  4. Pre build image for speed enhancement
+  5. Provision only configuration
 
-    - The kubernetes cluster bash + salt files are great because they work everywhere but bash is not the best for readability.
-
-  2. Make it scalable
-
-    - Every part of a Kubernetes Cluster should be easy to scale.
-
-  3. Make it fault tolerant
-
-    - Google gives us health checks. Use them!
-
-  4. Make it fast
-
-    - Downloading binaries with cloud-config or a provisioning? No! We want a new Node up in seconds!
-    - Provision only configuration
+o = working
+x = not working
+- = not needed
 
 ### Infrastructure GCE ###
 
-| Resource     | Instance Templates   | Groupmanager | Pool   | Forwarding   | Healtcheck    | Firewall   | Network   |
+| Resource   | Instance Templates   | Groupmanager | Pool   | Forwarding   | Healtcheck    | Firewall   | Network   |
 | ----------:|---------------------:| ------------:| ------:| ------------:| -------------:| ----------:| ---------:|
-| network    | -                    |-             |-       |-             |-              |x           |o          |
+| network    | -                    |-             |-       |-             |-              |o           |o          |
 | etcd2      | o                    |o             |o       |o             |o              |o           |o          |
 | master     | o                    |o             |o       |o             |o              |o           |o          |
-| node       | o                    |o             |o       |o             |-              |x           |o          |
+| node       | o                    |o             |o       |o             |o              |o           |o          |
 
 ### Provisioning ###
 
-| Module     | Authentication | Authorization | Communication A | Communication B |
-| ----------:|---------------:|--------------:|----------------:|----------------:|
-| etcd2      | o              |o              |o                |o                |
-| kube-master| o              |o              |o                |o                |
-| kube-node  | o              |o              |o                |o                |
+| Module     | Certs | Communication   | Flannel   | Etcd Config | KubeConfig | Locofo | Docker | Wupiao | Heapster |
+| ----------:|------:|----------------:|----------:|------------:|-----------:|-------:|-------:|-------:|---------:|
+| etcd2      | o     |o                |-          |-            |-           |o       |-       |x       |x         |
+| kube-master| o     |o                |o          |o            |o           |o       |o       |x       |x         |
+| kube-node  | o     |o                |o          |-            |o           |-       |o       |x       |x         |
 
 ### Kubernetes ###
+
+| Service             | GCE | AWS | Vagrant |
+|--------------------:|----:|----:|--------:|
+| Kube-Api            |o    |x    |x        |
+| Scheduler           |o    |x    |x        |
+| Controller-Manager  |o    |x    |x        |
+| Kubelet             |o    |x    |x        |
+| Proxy               |o    |x    |x        |
+
+
+### Addons ###
+None atm
 
 
 ## Setup ##
@@ -56,11 +61,8 @@ Servers can be spinned up with gce but the kubernetes tools have some configurat
   - terraform  -
   - packer -
   - gcloud in $PATH -
-  - gcloud config setup correctly
-  - gcloud auth login 
   - terraform local exec provider -
-  - image - see build the image
-  - a domain added to cloud-dns from gce
+  - a domain added to cloud-dns from (gce only)
 
 ### Build the image ###
 
@@ -106,15 +108,20 @@ to speed up. Because there is no `depends_on` for modules we have to use a littl
 The modules are using variables that come from a module instead of the variables file.
 
 ### 1. Network ###
-We setup the network with the main firewall rules.
+We setup one network for the nodes and one for the pods including all needed firewall rules.
 
-### 2. Cert ###
-Because we need a CA cert to generate our certs and key files, we generate one.
-This is done via the `terraform-local-execute` provider  (a plugin) and etcd-ca.
+### 2. Certs ###
+Because we need a CA cert to generate our certs and key files, we generate one
+via the `terraform-local-execute` provider  (a plugin for terraform) and etcd-ca.
 
-We upload them to GCEs metadata store. So we can later download them from any new instance.
+We upload them to GCEs metadata store. So we can later download them from any new instance and create
+client certs.
 
-### 3. etcd ###
+### 3. etcd2 ###
+
+Terraform generates a discovery token for etcd before it spinns up the cluster.
+This is not the best solution but works for the moment. Should be replaced by something like this:
+http://engineering.monsanto.com/2015/06/12/etcd-clustering/
 
 ### 4. Kubernetes Master ###
 
@@ -136,3 +143,5 @@ https://github.com/stylelab-io/coreos-kubernetes-packer
 
 You can find the code here:
 https://github.com/stvnwrgs/locofo
+
+## Limitations ##
