@@ -147,6 +147,7 @@ coreos:
           --cadvisor-port=0 \
           --cloud-provider=${cloud_provider} \
           --cluster_domain=cluster.local \
+          --cluster-dns=10.220.8.8 \
           --config=/etc/kubernetes/manifests \
           --enable-debugging-handlers=true \
           --kubeconfig=/etc/kubernetes/kube.config \

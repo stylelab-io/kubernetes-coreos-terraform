@@ -32,7 +32,7 @@ resource "google_dns_record_set" "kube-master" {
     managed_zone = "${var.domain_zone_name}"
     name = "kube-master-lb.${var.domain}."
     type = "A"
-    ttl = 60
+    ttl = 5
     rrdatas = ["${google_compute_forwarding_rule.kube-master.ip_address}"]
 }
 
