@@ -1,11 +1,11 @@
 provider "google" {
-    account_file  = '${file("${var.gce_account_file}")}'
+    account_file  = "${file("${var.gce_account_file}")}"
     project       = "${var.gce_project}"
     region        = "${var.gce_region}"
 }
 
 module "network" {
-    source = "./modules/network"
+    source                    = "./modules/network"
 
     gce_project               = "${var.gce_project}"
     gce_region                = "${var.gce_region}"
@@ -29,7 +29,7 @@ module "cert" {
 }
 
 module "etcd" {
-    source = "modules/etcd"
+    source                = "modules/etcd"
 
     # provided by modules
     lb_ip                 ="${module.network.etcd_ip}"
@@ -61,7 +61,7 @@ module "etcd" {
 
 
 module "kubernetes-master" {
-    source = "modules/kubernetes-master"
+    source                = "modules/kubernetes-master"
 
     etcd_address          = "${module.etcd.pub_address}"
     lb_ip                 ="${module.network.km_ip}"
@@ -94,7 +94,7 @@ module "kubernetes-node" {
     domain_zone_name      = "${var.domain_zone_name}"
 
     etcd_address          = "${module.etcd.pub_address}"
-    lb_ip                 ="${module.network.km_ip}"
+    lb_ip                 = "${module.network.km_ip}"
     service_network_name  = "${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
 

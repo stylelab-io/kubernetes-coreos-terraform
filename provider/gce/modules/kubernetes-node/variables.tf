@@ -12,12 +12,12 @@ variable "kube_image" {}
 variable "kn_count" {}
 variable "kn_machine_type" {}
 
-varibale "kn_scale_min_count" {}
-varibale "kn_scale_max_count" {}
-varibale "kn_scale_cpu_target" {}
+variable "kn_scale_min_count" {}
+variable "kn_scale_max_count" {}
+variable "kn_scale_cpu_target" {}
 variable "kn_scale_cooldown" {}
 
-  #gce vars
+#gce vars
 variable "gce_project" {}
 variable "gce_region" {}
 variable "gce_zone" {}
@@ -26,5 +26,5 @@ variable "gce_account_file" {}
 # removable?
 variable "gce_network_range" {}
 
-  # flannel
+# flannel
 variable "flannel_network" {}
