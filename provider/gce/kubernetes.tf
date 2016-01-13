@@ -39,11 +39,12 @@ module "etcd" {
     domain_zone_name = "${var.domain_zone_name}"
 
     # etcd vars
-    etcd_count = "${var.etcd_count}"
     etcd_image = "${var.image}"
+    etcd_count = "${var.etcd_count}"
+    etcd_machine_type = "${var.etcd_machine_type}"
+    
     etcd_data_disk_size = "${var.etcd_data_disk_size}"
     etcd_image_disk_size = "${var.etcd_image_disk_size}"
-    etcd_machine_type = "${var.etcd_machine_type}"
 
     #gce vars
     gce_project = "${var.gce_project}"
@@ -71,6 +72,7 @@ module "kubernetes-master" {
 
     kube_image = "${var.image}"
     km_count = "${var.km_count}"
+    km_machine_type = "${var.km_machine_type}"
 
     #gce vars
     gce_project = "${var.gce_project}"

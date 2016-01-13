@@ -76,7 +76,7 @@ resource "google_compute_instance_template" "kube-master" {
     name = "${var.cluster_prefix}kube-master-template"
     description = "Kube Master instance template"
     instance_description = "Kube Master instace"
-    machine_type = "n1-standard-1"
+    machine_type = "${var.km_machine_type}"
     can_ip_forward = true
     automatic_restart = true
     on_host_maintenance = "MIGRATE"

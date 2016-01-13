@@ -9,6 +9,7 @@ variable "lb_ip" {}
 variable "service_network_name" {}
 variable "kube_image" {}
 
+variable "km_machine_type" {}
 variable "km_count" {}
 
   #gce vars
