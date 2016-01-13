@@ -37,15 +37,15 @@ resource "google_compute_network" "pod" {
 
 # allow icmp and rdp
 resource "google_compute_firewall" "allow-rdp-icmp-ext" {
-    name = "${var.gce_service_network_name}-allow-rdp-icmp-ext"
-    network = "${var.gce_service_network_name}"
+    name          = "${var.gce_service_network_name}-allow-rdp-icmp-ext"
+    network       = "${var.gce_service_network_name}"
     source_ranges = ["0.0.0.0/0"]
     allow {
-        protocol = "icmp"
+        protocol  = "icmp"
     }
     allow {
-        protocol = "tcp"
-        ports = ["3389"]
+        protocol  = "tcp"
+        ports     = ["3389"]
     }
     depends_on = [
         "google_compute_network.service",
@@ -54,12 +54,12 @@ resource "google_compute_firewall" "allow-rdp-icmp-ext" {
 
 # allow ssh
 resource "google_compute_firewall" "allow-ssh-ext" {
-    name = "${var.gce_service_network_name}-allow-ssh-ext"
-    network = "${var.gce_service_network_name}"
+    name          = "${var.gce_service_network_name}-allow-ssh-ext"
+    network       = "${var.gce_service_network_name}"
     source_ranges = ["0.0.0.0/0"]
     allow {
-        protocol = "tcp"
-        ports = ["22"]
+        protocol  = "tcp"
+        ports     = ["22"]
     }
     depends_on = [
         "google_compute_network.service",
@@ -68,16 +68,16 @@ resource "google_compute_firewall" "allow-ssh-ext" {
 
 # allow all from internal network
 resource "google_compute_firewall" "allow-all-internal" {
-    name = "${var.gce_service_network_name}-allow-all-internal"
-    network = "${var.gce_service_network_name}"
+    name          = "${var.gce_service_network_name}-allow-all-internal"
+    network       = "${var.gce_service_network_name}"
     source_ranges = ["${var.gce_service_network_range}", "${var.gce_pod_network_range}"]
     allow {
-        protocol = "udp"
-        ports = ["1-65535"]
+        protocol  = "udp"
+        ports     = ["1-65535"]
     }
     allow {
-        protocol = "tcp"
-        ports = ["1-65535"]
+        protocol  = "tcp"
+        ports     = ["1-65535"]
     }
     depends_on = [
         "google_compute_network.service",
@@ -85,13 +85,13 @@ resource "google_compute_firewall" "allow-all-internal" {
 }
 # http(s) 80,443,8080
 resource "google_compute_firewall" "allow-web-external" {
-    name = "${var.gce_service_network_name}-allow-web-external"
-    network = "${var.gce_service_network_name}"
+    name          = "${var.gce_service_network_name}-allow-web-external"
+    network       = "${var.gce_service_network_name}"
     source_ranges = ["0.0.0.0/0"]
-    target_tags = ["web"]
+    target_tags   = ["web"]
     allow {
-        protocol = "tcp"
-        ports = ["80", "443", "8080"]
+        protocol  = "tcp"
+        ports     = ["80", "443", "8080"]
     }
     depends_on = [
         "google_compute_network.service",
@@ -99,16 +99,16 @@ resource "google_compute_firewall" "allow-web-external" {
 }
 
 resource "google_compute_firewall" "allow-pod-all-internal" {
-    name = "${var.gce_pod_network_name}-allow-pod-all-internal"
-    network = "${var.gce_pod_network_name}"
+    name          = "${var.gce_pod_network_name}-allow-pod-all-internal"
+    network       = "${var.gce_pod_network_name}"
     source_ranges = ["${var.gce_service_network_range}", "${var.gce_pod_network_range}"]
     allow {
         protocol = "udp"
-        ports = ["1-65535"]
+        ports    = ["1-65535"]
     }
     allow {
         protocol = "tcp"
-        ports = ["1-65535"]
+        ports    = ["1-65535"]
     }
     depends_on = [
         "google_compute_network.pod",
