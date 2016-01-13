@@ -69,7 +69,9 @@ module "kubernetes-master" {
     cert_passphrase       = "${var.cert_passphrase}"
     domain                = "${var.domain}"
     domain_zone_name      = "${var.domain_zone_name}"
-
+    api_user              = "${var.api_user}"
+    api_pass              = "${var.api_pass}"
+    
     kube_image            = "${var.image}"
     km_count              = "${var.km_count}"
     km_machine_type       = "${var.km_machine_type}"

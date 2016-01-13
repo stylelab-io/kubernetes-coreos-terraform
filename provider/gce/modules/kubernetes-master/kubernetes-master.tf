@@ -69,6 +69,8 @@ resource "template_file" "cloud_config" {
       domain            = "${var.domain}"
       cloud_provider    = "gce"
       etcd_address      = "${var.etcd_address}"
+      api_user          = "${var.api_user}"
+      api_pass          = "${var.api_pass}"
     }
 }
 

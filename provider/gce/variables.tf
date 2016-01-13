@@ -5,6 +5,9 @@ variable "cluster_prefix" {
     default = "test-"
 }
 
+variable "api_user" {}
+variable "api_pass" {}
+
 variable "domain" {}
 variable "domain_zone_name" {}
 

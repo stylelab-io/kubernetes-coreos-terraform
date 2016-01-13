@@ -7,8 +7,11 @@ variable "cert_passphrase" {}
 variable "etcd_address" {}
 variable "lb_ip" {}
 variable "service_network_name" {}
-variable "kube_image" {}
 
+variable "api_user" {}
+variable "api_pass" {}
+
+variable "kube_image" {}
 variable "km_machine_type" {}
 variable "km_count" {}
 

@@ -54,7 +54,7 @@ write-files:
     owner: root:root
     permissions: 0755
     content: |
-      admin,admin,pass
+      ${api_user},${api_pass},pass
 
   - path: /etc/kubernetes/kube.config
     owner: root:root
