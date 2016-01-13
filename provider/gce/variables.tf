@@ -86,3 +86,15 @@ variable "kn_image" {
 variable "kn_count" {
     default = 1
 }
+variable "kn_scale_min_count" {
+    default = 1
+}
+variable "kn_scale_cooldown" {
+    default = 120
+}
+variable "kn_scale_max_count" {
+    default = 1
+}
+variable "kn_scale_cpu_target" {
+    default = 0.8
+}
