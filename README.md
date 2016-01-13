@@ -1,15 +1,19 @@
-# HaKoC #
+# kubernetes-coreos-terraform #
 
-A **H**igh **A**vailable **K**ubernetes **O**n **C**oreOs
-***
-
-The Goal: A production ready Kubernetes cluster running (atm only) on GCE that is provisioned by terraform
-but is also capable to run on Vagrant.
+The Goal: A production ready Kubernetes cluster running (atm only) on GCE that is provisioned by terraform and coreos cloud-init files.
 
 ## Status ##
-**Work in Progress**
+**Beta**
 
-Servers can be spinned up with gce but the kubernetes tools have some configuration problems.
+Servers can be spinned up with gce and kubernetes is able to run.
+
+Tested with Kubernetes 1.1.2 and 1.1.3
+
+| Provider | Status |
+|---------:|-------:|
+|vagrant   | none   |
+|gce       | full   |
+|aws       | none   |
 
 ## Why not using cluster-up ##
 
