@@ -69,6 +69,9 @@ None atm
 HaKoC needs the Kubernetes binaries preinstalled on the image under /opt/kubernetes
 There is already a http://packer.io template for that: https://github.com/stylelab-io/coreos-kubernetes-packer
 
+### GCE Preperation ###
+Create a dns zone under network if you dont have one already.
+
 ### Configuration ###
 Terraform uses `variables.tf` files to define the variables a module or the root module needs.
 

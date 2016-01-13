@@ -93,7 +93,7 @@ resource "google_compute_instance_template" "etcd" {
     name = "${var.cluster_prefix}etcd-template"
     description = "A template for etcd2 instances"
     instance_description = "A etcd2 node"
-    machine_type = "n1-standard-1"
+    machine_type = "${var.etcd_machine_type}"
     can_ip_forward = false
     automatic_restart = true
     on_host_maintenance = "MIGRATE"
