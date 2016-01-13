@@ -32,12 +32,6 @@ write-files:
       update-ca-certificates
       mkdir /etc/kubernetes/manifests
 
-  - path: /etc/kubernetes/auth.csv
-    owner: root:root
-    permissions: 0755
-    content: |
-      admin,admin,pass
-
   - path: /etc/kubernetes/kube.config
     owner: root:root
     permissions: 0755
