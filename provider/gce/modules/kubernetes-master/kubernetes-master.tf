@@ -54,7 +54,7 @@ resource "google_compute_firewall" "kube-external" {
 
     allow {
         protocol = "tcp"
-        ports    = ["8080", "443"]
+        ports    = ["443"]
     }
     source_ranges = ["${var.gce_network_range}","${var.flannel_network}"]
     target_tags   = ["kube-master"]
