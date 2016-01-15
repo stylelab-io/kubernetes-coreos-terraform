@@ -12,6 +12,7 @@ variable "api_user" {}
 variable "api_pass" {}
 
 variable "kube_image" {}
+variable "km_disk_size" {}
 variable "km_machine_type" {}
 variable "km_count" {}
 

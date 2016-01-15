@@ -27,7 +27,7 @@ write-files:
       chmod 755 /etc/ssl/private
       cd /etc/ssl/private && cp .etcd-ca/ca.crt ./ca.crt
       cd /etc/ssl/private && cp .etcd-ca/ca.crt /etc/ssl/certs/ca.pem
-      mkdir /etc/ssl/etcd
+      mkdir -p /etc/ssl/etcd
       cp -R /etc/ssl/private/* /etc/ssl/etcd
       update-ca-certificates
 

@@ -54,7 +54,7 @@ resource "google_compute_firewall" "kube-external" {
 
     allow {
         protocol = "tcp"
-        ports    = ["8080", "443"]
+        ports    = ["443"]
     }
     source_ranges = ["${var.gce_network_range}","${var.flannel_network}"]
     target_tags   = ["kube-master"]
@@ -89,6 +89,7 @@ resource "google_compute_instance_template" "kube-master" {
         source_image  = "${var.kube_image}"
         auto_delete   = true
         boot          = true
+        disk_size_gb  = "${var.km_disk_size}"
     }
 
     network_interface {

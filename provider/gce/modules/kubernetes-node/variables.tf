@@ -10,6 +10,7 @@ variable "service_network_name" {}
 variable "kube_image" {}
 
 variable "kn_count" {}
+variable "kn_disk_size" {}
 variable "kn_machine_type" {}
 
 variable "kn_scale_min_count" {}
