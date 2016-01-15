@@ -71,8 +71,9 @@ module "kubernetes-master" {
     domain_zone_name      = "${var.domain_zone_name}"
     api_user              = "${var.api_user}"
     api_pass              = "${var.api_pass}"
-    
+
     kube_image            = "${var.image}"
+    km_disk_size          = "${var.km_disk_size}"
     km_count              = "${var.km_count}"
     km_machine_type       = "${var.km_machine_type}"
 
@@ -101,6 +102,7 @@ module "kubernetes-node" {
     cert_passphrase       = "${var.cert_passphrase}"
 
     kube_image            = "${var.image}"
+    kn_disk_size          = "${var.kn_disk_size}"
     kn_count              = "${var.kn_count}"
     kn_machine_type       = "${var.kn_machine_type}"
 

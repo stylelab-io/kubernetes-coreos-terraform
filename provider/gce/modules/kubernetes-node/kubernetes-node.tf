@@ -25,6 +25,7 @@ resource "google_compute_instance_template" "kube-node" {
         source_image  = "${var.kube_image}"
         auto_delete   = true
         boot          = true
+        disk_size_gb  = "${var.kn_disk_size}"
     }
 
     network_interface {

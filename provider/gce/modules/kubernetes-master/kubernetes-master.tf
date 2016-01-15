@@ -89,6 +89,7 @@ resource "google_compute_instance_template" "kube-master" {
         source_image  = "${var.kube_image}"
         auto_delete   = true
         boot          = true
+        disk_size_gb  = "${var.km_disk_size}"
     }
 
     network_interface {

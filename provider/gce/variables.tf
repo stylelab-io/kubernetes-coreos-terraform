@@ -68,7 +68,7 @@ variable "km_machine_type" {
     default = "n1-standard-1"
 }
 variable "km_disk_size" {
-    default = 50
+    default = 100
 }
 variable "km_count" {
     default = 1
@@ -78,7 +78,7 @@ variable "kn_machine_type" {
     default = "n1-standard-1"
 }
 variable "kn_disk_size" {
-    default = 30
+    default = 200
 }
 variable "kn_image" {
     default = "coreos-stable-766-3-0-v20150908"
