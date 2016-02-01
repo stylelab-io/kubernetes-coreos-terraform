@@ -2,6 +2,10 @@ output "kube_master_ip" {
     value = "${google_compute_address.kube-master.ip_address}"
 }
 
+output "kubernetes_api_url" {
+  value = "https://kube-master-lb.${var.domain}"
+}
+
 resource "google_compute_address" "kube-master" {
     name = "${var.cluster_prefix}kube-master-ip"
 }
