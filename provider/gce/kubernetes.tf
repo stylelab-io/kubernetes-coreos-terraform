@@ -4,6 +4,30 @@ provider "google" {
     region        = "${var.gce_region}"
 }
 
+output "kubernetes_api_url" {
+    value = "${module.kubernetes-master.kubernetes_api_url}"
+}
+
+output "command_helper" {
+  value = "Excute the following commands to add this cluster to your kubernetes configuration:"
+}
+
+output "command_1" {
+  value = "kubectl config set-cluster ${var.domain_zone_name} --insecure-skip-tls-verify=true --server=${module.kubernetes-master.kubernetes_api_url}"
+}
+
+output "command_2" {
+  value = "kubectl config set-credentials ${var.domain_zone_name} --password='${var.api_pass}' --username='${var.api_user}'"
+}
+
+output "command_3" {
+  value = "kubectl config set-context hakoc --cluster=${var.domain_zone_name} --user=${var.domain_zone_name} --namespace=default"
+}
+
+output "command_3" {
+  value = "kubectl config set-context ${var.domain_zone_name}"
+}
+
 module "network" {
     source                    = "./modules/network"
 
