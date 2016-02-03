@@ -56,8 +56,8 @@ module "etcd" {
     source                = "modules/etcd"
 
     # provided by modules
-    lb_ip                 ="${module.network.etcd_ip}"
-    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
+    lb_ip                 = "${module.network.etcd_ip}"
+    service_network_name  = "${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
     domain                = "${var.domain}"
     domain_zone_name      = "${var.domain_zone_name}"
@@ -89,7 +89,7 @@ module "kubernetes-master" {
 
     etcd_address          = "${module.etcd.pub_address}"
     lb_ip                 = "${module.network.km_ip}"
-    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
+    service_network_name  = "${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
     domain                = "${var.domain}"
     domain_zone_name      = "${var.domain_zone_name}"
@@ -122,7 +122,7 @@ module "kubernetes-node" {
 
     etcd_address          = "${module.etcd.pub_address}"
     lb_ip                 = "${module.network.km_ip}"
-    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
+    service_network_name  = "${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
 
     kube_image            = "${var.image}"
