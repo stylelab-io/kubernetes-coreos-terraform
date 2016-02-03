@@ -62,7 +62,7 @@ None atm
 ## Setup ##
 
 ### Requirements ###
-  - terraform  -
+  - terraform >= 0.6.10 -
   - packer -
   - gcloud in $PATH -
   - terraform local exec provider -
