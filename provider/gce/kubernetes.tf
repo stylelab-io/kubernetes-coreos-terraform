@@ -36,9 +36,9 @@ module "network" {
     gce_zone                  = "${var.gce_zone}"
     cluster_prefix            = "${var.cluster_prefix}"
     gce_account_file          = "${var.gce_account_file}"
-    gce_service_network_name  = "${var.gce_service_network_name}"
+    gce_service_network_name  = "${var.cluster_prefix}${var.gce_service_network_name}"
     gce_service_network_range = "${var.gce_service_network_range}"
-    gce_pod_network_name      = "${var.gce_pod_network_name}"
+    gce_pod_network_name      = "${var.cluster_prefix}${var.gce_pod_network_name}"
     gce_pod_network_range     = "${var.gce_pod_network_range}"
 }
 
@@ -57,7 +57,7 @@ module "etcd" {
 
     # provided by modules
     lb_ip                 ="${module.network.etcd_ip}"
-    service_network_name  = "${module.network.service_network_name}"
+    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
     domain                = "${var.domain}"
     domain_zone_name      = "${var.domain_zone_name}"
@@ -71,10 +71,10 @@ module "etcd" {
     etcd_image_disk_size  = "${var.etcd_image_disk_size}"
 
     #gce vars
+    cluster_prefix        = "${var.cluster_prefix}"
     gce_project           = "${var.gce_project}"
     gce_region            = "${var.gce_region}"
     gce_zone              = "${var.gce_zone}"
-    cluster_prefix        = "${var.cluster_prefix}"
     gce_account_file      = "${var.gce_account_file}"
     gce_network_range     = "${var.gce_service_network_range}"
     gce_pod_network_range = "${var.gce_pod_network_range}"
@@ -88,8 +88,8 @@ module "kubernetes-master" {
     source                = "modules/kubernetes-master"
 
     etcd_address          = "${module.etcd.pub_address}"
-    lb_ip                 ="${module.network.km_ip}"
-    service_network_name  = "${module.network.service_network_name}"
+    lb_ip                 = "${module.network.km_ip}"
+    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
     domain                = "${var.domain}"
     domain_zone_name      = "${var.domain_zone_name}"
@@ -122,7 +122,7 @@ module "kubernetes-node" {
 
     etcd_address          = "${module.etcd.pub_address}"
     lb_ip                 = "${module.network.km_ip}"
-    service_network_name  = "${module.network.service_network_name}"
+    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
 
     kube_image            = "${var.image}"
