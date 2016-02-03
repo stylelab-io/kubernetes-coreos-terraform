@@ -1,5 +1,6 @@
 resource "template_file" "cloud_config" {
-    filename = "../../coreos/node.yml"
+    template = "../../coreos/node.yml"
+
     vars {
       cluster_prefix    = "${var.cluster_prefix}"
       lb_ip             = "${var.lb_ip}"
@@ -16,8 +17,6 @@ resource "google_compute_instance_template" "kube-node" {
     instance_description  = "kube-node"
     machine_type          = "${var.kn_machine_type}"
     can_ip_forward        = true
-    automatic_restart     = true
-    on_host_maintenance   = "MIGRATE"
     tags                  = ["kube-node"]
 
     # Create a new boot disk from an image
@@ -42,6 +41,16 @@ resource "google_compute_instance_template" "kube-node" {
     service_account {
         scopes = ["userinfo-email", "compute-rw", "storage-ro"]
     }
+
+    scheduling {
+      automatic_restart   = true
+      on_host_maintenance = "MIGRATE"
+    }
+
+    depends_on = [
+        "template_file.cloud_config",
+    ]
+
 }
 
 resource "google_compute_target_pool" "kube-node" {
