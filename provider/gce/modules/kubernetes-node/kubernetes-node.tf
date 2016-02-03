@@ -76,7 +76,7 @@ resource "google_compute_instance_group_manager" "kube-node" {
     name               = "${var.cluster_prefix}kube-node-manager"
     instance_template  = "${google_compute_instance_template.kube-node.self_link}"
     target_pools       = ["${google_compute_target_pool.kube-node.self_link}"]
-    base_instance_name = "kube-node"
+    base_instance_name = "${var.cluster_prefix}kube-node"
     zone               = "${var.gce_zone}"
 #    target_size = 1
 }
