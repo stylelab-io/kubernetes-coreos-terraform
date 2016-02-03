@@ -54,7 +54,7 @@ resource "google_compute_instance_template" "kube-node" {
 }
 
 resource "google_compute_target_pool" "kube-node" {
-    name = "kube-node-pool"
+    name = "${var.cluster_prefix}kube-node-pool"
 }
 
 resource "google_compute_autoscaler" "kube-node" {
