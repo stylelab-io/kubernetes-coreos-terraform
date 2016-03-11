@@ -21,7 +21,7 @@ output "4_command" {
 }
 
 output "5_command" {
-  value = "kubectl config set-context hakoc --cluster=${var.domain_zone_name} --user=${var.domain_zone_name} --namespace=default"
+  value = "kubectl config set-context ${var.domain_zone_name} --cluster=${var.domain_zone_name} --user=${var.domain_zone_name} --namespace=default"
 }
 
 output "6_command" {
