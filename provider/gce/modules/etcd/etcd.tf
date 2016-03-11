@@ -73,7 +73,7 @@ resource "google_dns_record_set" "etcd" {
 }
 
 resource "template_file" "cloud_config" {
-    filename = "../../coreos/etcd.yml"
+    template = "../../coreos/etcd.yml"
 
     vars {
         cluster_prefix  = "${var.cluster_prefix}"
@@ -94,8 +94,6 @@ resource "google_compute_instance_template" "etcd" {
     instance_description  = "A etcd2 node"
     machine_type          = "${var.etcd_machine_type}"
     can_ip_forward        = false
-    automatic_restart     = true
-    on_host_maintenance   = "MIGRATE"
     tags                  = ["etcd"]
 
     disk {
@@ -117,6 +115,11 @@ resource "google_compute_instance_template" "etcd" {
 
     service_account {
         scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+    }
+
+    scheduling {
+      automatic_restart   = true
+      on_host_maintenance = "MIGRATE"
     }
 
     depends_on = [

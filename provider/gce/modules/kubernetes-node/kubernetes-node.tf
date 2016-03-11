@@ -1,5 +1,6 @@
 resource "template_file" "cloud_config" {
-    filename = "../../coreos/node.yml"
+    template = "../../coreos/node.yml"
+
     vars {
       cluster_prefix    = "${var.cluster_prefix}"
       lb_ip             = "${var.lb_ip}"
@@ -16,8 +17,6 @@ resource "google_compute_instance_template" "kube-node" {
     instance_description  = "kube-node"
     machine_type          = "${var.kn_machine_type}"
     can_ip_forward        = true
-    automatic_restart     = true
-    on_host_maintenance   = "MIGRATE"
     tags                  = ["kube-node"]
 
     # Create a new boot disk from an image
@@ -42,10 +41,20 @@ resource "google_compute_instance_template" "kube-node" {
     service_account {
         scopes = ["userinfo-email", "compute-rw", "storage-ro"]
     }
+
+    scheduling {
+      automatic_restart   = true
+      on_host_maintenance = "MIGRATE"
+    }
+
+    depends_on = [
+        "template_file.cloud_config",
+    ]
+
 }
 
 resource "google_compute_target_pool" "kube-node" {
-    name = "kube-node-pool"
+    name = "${var.cluster_prefix}kube-node-pool"
 }
 
 resource "google_compute_autoscaler" "kube-node" {
@@ -67,7 +76,7 @@ resource "google_compute_instance_group_manager" "kube-node" {
     name               = "${var.cluster_prefix}kube-node-manager"
     instance_template  = "${google_compute_instance_template.kube-node.self_link}"
     target_pools       = ["${google_compute_target_pool.kube-node.self_link}"]
-    base_instance_name = "kube-node"
+    base_instance_name = "${var.cluster_prefix}kube-node"
     zone               = "${var.gce_zone}"
 #    target_size = 1
 }

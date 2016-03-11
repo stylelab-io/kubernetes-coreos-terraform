@@ -65,7 +65,8 @@ resource "google_compute_firewall" "kube-external" {
 }
 
 resource "template_file" "cloud_config" {
-    filename = "../../coreos/master.yml"
+    template = "../../coreos/master.yml"
+
     vars {
       cluster_prefix    = "${var.cluster_prefix}"
       lb_ip             = "${var.lb_ip}"
@@ -84,8 +85,6 @@ resource "google_compute_instance_template" "kube-master" {
     instance_description = "Kube Master instace"
     machine_type         = "${var.km_machine_type}"
     can_ip_forward       = true
-    automatic_restart    = true
-    on_host_maintenance  = "MIGRATE"
     tags                 = ["kube-master", "web"]
 
     # Create a new boot disk from an image
@@ -110,6 +109,12 @@ resource "google_compute_instance_template" "kube-master" {
     service_account {
         scopes = ["userinfo-email", "compute-rw", "storage-ro"]
     }
+
+    scheduling {
+      automatic_restart   = true
+      on_host_maintenance = "MIGRATE"
+    }
+
     depends_on = [
         "template_file.cloud_config",
     ]

@@ -1,5 +1,5 @@
 provider "google" {
-    account_file  = "${file("${var.gce_account_file}")}"
+    credentials  = "${file("${var.gce_account_file}")}"
     project       = "${var.gce_project}"
     region        = "${var.gce_region}"
 }
@@ -21,7 +21,7 @@ output "4_command" {
 }
 
 output "5_command" {
-  value = "kubectl config set-context hakoc --cluster=${var.domain_zone_name} --user=${var.domain_zone_name} --namespace=default"
+  value = "kubectl config set-context ${var.domain_zone_name} --cluster=${var.domain_zone_name} --user=${var.domain_zone_name} --namespace=default"
 }
 
 output "6_command" {
@@ -56,8 +56,8 @@ module "etcd" {
     source                = "modules/etcd"
 
     # provided by modules
-    lb_ip                 ="${module.network.etcd_ip}"
-    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
+    lb_ip                 = "${module.network.etcd_ip}"
+    service_network_name  = "${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
     domain                = "${var.domain}"
     domain_zone_name      = "${var.domain_zone_name}"
@@ -89,7 +89,7 @@ module "kubernetes-master" {
 
     etcd_address          = "${module.etcd.pub_address}"
     lb_ip                 = "${module.network.km_ip}"
-    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
+    service_network_name  = "${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
     domain                = "${var.domain}"
     domain_zone_name      = "${var.domain_zone_name}"
@@ -122,7 +122,7 @@ module "kubernetes-node" {
 
     etcd_address          = "${module.etcd.pub_address}"
     lb_ip                 = "${module.network.km_ip}"
-    service_network_name  = "${var.cluster_prefix}${module.network.service_network_name}"
+    service_network_name  = "${module.network.service_network_name}"
     cert_passphrase       = "${var.cert_passphrase}"
 
     kube_image            = "${var.image}"

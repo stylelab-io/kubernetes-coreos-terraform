@@ -62,7 +62,7 @@ None atm
 ## Setup ##
 
 ### Requirements ###
-  - terraform  -
+  - terraform >= 0.6.10 -
   - packer -
   - gcloud in $PATH -
   - terraform local exec provider -
@@ -70,11 +70,11 @@ None atm
 
 ### Build the image ###
 
-HaKoC needs the Kubernetes binaries preinstalled on the image under /opt/kubernetes
-There is already a http://packer.io template for that: https://github.com/stylelab-io/coreos-kubernetes-packer
+HaKoC needs the Kubernetes binaries preinstalled on the image under /opt/bin
+There is already a http://packer.io template for that: https://github.com/stylelab-io/kubernetes-coreos-packer
 
 ### GCE Preperation ###
-Create a dns zone under network if you dont have one already.
+Create a dns zone under network if you dont have one already. kubernetes-coreos-terraform will add the kubemaster to the dns entries and generate a cert for it.
 
 ### Configuration ###
 Terraform uses `variables.tf` files to define the variables a module or the root module needs.
@@ -92,7 +92,7 @@ gce_zone = "europe-west1-b"
 gce_account_file = "/path/to/your-account-file.json"
 domain = "domain.with.dots.tld"
 domain_zone_name = "zone-name-tld"
-image = "coreos-alpha-815-0-0-kube-1-0-6-xxxxxxxxx" # has to be builded first
+image = "coreos-alpha-815-0-0-kube-1-0-6-xxxxxxxxx" # has to be build first
 etcd_cert_passphrase = "1234"
 ```
 
@@ -146,7 +146,7 @@ After the the system went up, it generates the server / client certs.
 ### locofo ###
 
 Because health checks wont work with tls i wrote a little proxy. Locofo is installed automatically if you create an image with
-https://github.com/stylelab-io/coreos-kubernetes-packer
+https://github.com/stylelab-io/kubernetes-coreos-packer
 
 You can find the code here:
 https://github.com/stvnwrgs/locofo
