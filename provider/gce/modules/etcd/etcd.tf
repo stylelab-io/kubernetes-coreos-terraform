@@ -5,8 +5,8 @@ output "pub_address" {
 # one-liner to generate a new discovery token url
 # res=$(curl -w "\n" 'https://discovery.etcd.io/new?size=3');sed -i'' -e "s,discovery: \".*,discovery: \"$res\",g" coreos/etcd.yml;rm coreos/etcd.yml-e;
 resource "execute_command" "set_discovery_url" {
-  #command = "res=$(curl -w '\n' 'https://discovery.etcd.io/new?size=3');sed -i'' -e 's,discovery: \\".*,discovery: \\"$res\\",g' $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e;"
-  command = "res=$(curl -w -s'\n' 'https://discovery.etcd.io/new?size=${var.etcd_count}');sed -i'' -e \"s,discovery: \\\".*,discovery: \\\"$res\\\",g\" $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e || true;"
+  #command = "res=$(curl --silent -w '\n' 'https://discovery.etcd.io/new?size=3');sed -i'' -e 's,discovery: \\".*,discovery: \\"$res\\",g' $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e;"
+  command = "res=$(curl --silent -w '\n' 'https://discovery.etcd.io/new?size=${var.etcd_count}');sed -i'' -e \"s,discovery: \\\".*,discovery: \\\"$res\\\",g\" $PWD/../../coreos/etcd.yml;rm $PWD/../../coreos/etcd.yml-e || true;"
   destroy_command = ""
 }
 
